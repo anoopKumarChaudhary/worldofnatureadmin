@@ -1,7 +1,8 @@
 // src/app/page.tsx
 "use client";
 
-import { useAppSelector } from "./redux/hooks";
+import { useState, useEffect } from "react";
+// import { useAppSelector } from "./redux/hooks"; // Not needed for stats anymore if fetching directly
 import AdminLayout from "./components/AdminLayout";
 import {
   Users,
@@ -13,35 +14,52 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { products } = useAppSelector((state) => state.products);
-  const { orders } = useAppSelector((state) => state.orders);
-  const { users } = useAppSelector((state) => state.users);
+  const [statsData, setStatsData] = useState({
+    totalOrders: 0,
+    totalProducts: 0,
+    totalUsers: 0,
+    totalRevenue: 0,
+    recentOrders: [],
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/dashboard/stats");
+        const data = await response.json();
+        setStatsData(data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const stats = [
     {
       name: "Total Products",
-      value: products.length,
+      value: statsData.totalProducts,
       icon: Package,
       change: "+12%",
       changeType: "positive",
     },
     {
       name: "Total Orders",
-      value: orders.length,
+      value: statsData.totalOrders,
       icon: ShoppingCart,
       change: "+8%",
       changeType: "positive",
     },
     {
       name: "Total Users",
-      value: users.length,
+      value: statsData.totalUsers,
       icon: Users,
       change: "+23%",
       changeType: "positive",
     },
     {
       name: "Revenue",
-      value: "₹45,231",
+      value: `₹${statsData.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       change: "-4%",
       changeType: "negative",
@@ -104,68 +122,51 @@ export default function Dashboard() {
               Recent Orders
             </h3>
             <div className="space-y-4">
-              {orders.slice(0, 5).map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Order #{order.id}
-                    </p>
-                    <p className="text-sm text-gray-500">{order.userName}</p>
+              {statsData.recentOrders.length > 0 ? (
+                statsData.recentOrders.map((order: any) => (
+                  <div
+                    key={order._id}
+                    className="flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Order #{order._id.slice(-6)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">
+                        ₹{order.total}
+                      </p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          order.status === "delivered"
+                            ? "bg-green-100 text-green-800"
+                            : order.status === "shipped"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      ₹{order.total}
-                    </p>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.status === "delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "shipped"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500">No recent orders</p>
+              )}
             </div>
           </div>
 
+          {/* Top Products - Placeholder/Future Implementation */}
           <div className="rounded-lg bg-white p-6 shadow">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Top Products
             </h3>
             <div className="space-y-4">
-              {products.slice(0, 5).map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.title}
-                      className="h-10 w-10 rounded-lg object-cover bg-gray-100"
-                    />
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">
-                        {product.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {product.category}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">
-                    ₹{product.price}
-                  </p>
-                </div>
-              ))}
+              <p className="text-gray-500">Coming soon...</p>
             </div>
           </div>
         </div>
