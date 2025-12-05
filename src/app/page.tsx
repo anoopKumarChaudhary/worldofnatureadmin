@@ -1,3 +1,4 @@
+// src/app/page.tsx
 "use client";
 
 import { useAppSelector } from "./redux/hooks";
@@ -149,7 +150,7 @@ export default function Dashboard() {
                     <img
                       src={product.imageUrl}
                       alt={product.title}
-                      className="h-10 w-10 rounded-lg object-cover"
+                      className="h-10 w-10 rounded-lg object-cover bg-gray-100"
                     />
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">
@@ -161,7 +162,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <p className="text-sm font-medium text-gray-900">
-                    {product.price}
+                    ₹{product.price}
                   </p>
                 </div>
               ))}

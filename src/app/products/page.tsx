@@ -1,8 +1,16 @@
+// src/app/products/page.tsx
 "use client";
 
 import { useState } from "react";
-import { useAppSelector } from "../redux/hooks";
+import { useAppSelector, useAppDispatch } from "../redux/hooks";
+import {
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  Product,
+} from "../redux/features/products/productsSlice";
 import AdminLayout from "../components/AdminLayout";
+import Modal from "../components/Modal";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
 
 export default function ProductsPage() {
@@ -10,7 +18,7 @@ export default function ProductsPage() {
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -37,7 +45,7 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleEditProduct = (product) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setFormData({
       title: product.title,
@@ -50,34 +58,33 @@ export default function ProductsPage() {
   };
 
   const handleSaveProduct = () => {
+    const priceValue = parseFloat(formData.price) || 0;
+
     if (editingProduct) {
-      // Update existing product
-      dispatch({
-        type: "products/updateProduct",
-        payload: {
+      dispatch(
+        updateProduct({
           ...editingProduct,
           ...formData,
-          price: parseFloat(formData.price),
-        },
-      });
+          price: priceValue,
+        })
+      );
     } else {
-      // Add new product
-      const newProduct = {
-        id: Date.now(),
+      const newProduct: Product = {
+        id: Date.now().toString(),
         ...formData,
-        price: parseFloat(formData.price),
+        price: priceValue,
         rating: 0,
         reviewCount: 0,
         createdAt: new Date().toISOString(),
       };
-      dispatch({ type: "products/addProduct", payload: newProduct });
+      dispatch(addProduct(newProduct));
     }
     setIsModalOpen(false);
   };
 
-  const handleDeleteProduct = (productId) => {
+  const handleDeleteProduct = (productId: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      dispatch({ type: "products/deleteProduct", payload: productId });
+      dispatch(deleteProduct(productId));
     }
   };
 
@@ -98,7 +105,7 @@ export default function ProductsPage() {
           </button>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -114,7 +121,7 @@ export default function ProductsPage() {
 
         {/* Products Table */}
         <div className="rounded-lg bg-white shadow">
-          <div className="overflow-x-auto">
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -146,7 +153,7 @@ export default function ProductsPage() {
                         <img
                           src={product.imageUrl}
                           alt={product.title}
-                          className="h-10 w-10 rounded-lg object-cover"
+                          className="h-10 w-10 rounded-lg object-cover bg-gray-100"
                         />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -162,7 +169,7 @@ export default function ProductsPage() {
                       {product.category}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {product.price}
+                      ₹{product.price}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                       {product.rating} ({product.reviewCount})
@@ -173,10 +180,16 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900 mr-4">
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                      >
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -185,6 +198,43 @@ export default function ProductsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Cards View */}
+          <div className="md:hidden space-y-4 p-4">
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="rounded-lg border border-gray-200 p-4"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {product.title}
+                  </h3>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Active
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mb-2">{product.category}</p>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold">₹{product.price}</span>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditProduct(product)}
+                      className="text-blue-600"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {filteredProducts.length === 0 && (
@@ -192,6 +242,99 @@ export default function ProductsPage() {
             <p className="text-gray-500">No products found.</p>
           </div>
         )}
+
+        {/* Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={editingProduct ? "Edit Product" : "Add Product"}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Price
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Category
+              </label>
+              <input
+                type="text"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Image URL
+              </label>
+              <input
+                type="url"
+                value={formData.imageUrl}
+                onChange={(e) =>
+                  setFormData({ ...formData, imageUrl: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              />
+            </div>
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProduct}
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+              >
+                {editingProduct ? "Update" : "Add"} Product
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </AdminLayout>
   );

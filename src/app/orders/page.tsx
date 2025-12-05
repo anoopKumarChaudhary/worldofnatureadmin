@@ -1,3 +1,4 @@
+// src/app/orders/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -93,7 +94,10 @@ export default function OrdersPage() {
                         {order.status}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    <td
+                      className="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
+                      suppressHydrationWarning
+                    >
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -127,9 +131,7 @@ export default function OrdersPage() {
                         ? "bg-green-100 text-green-800"
                         : order.status === "shipped"
                         ? "bg-blue-100 text-blue-800"
-                        : order.status === "processing"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {order.status}
@@ -138,26 +140,14 @@ export default function OrdersPage() {
                 <div className="space-y-1 text-sm text-gray-600">
                   <p>Customer: {order.userName}</p>
                   <p>Total: ₹{order.total}</p>
-                  <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div className="flex justify-end mt-4 space-x-2">
-                  <button className="text-blue-600 hover:text-blue-900">
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button className="text-green-600 hover:text-green-900">
-                    <Edit className="h-4 w-4" />
-                  </button>
+                  <p suppressHydrationWarning>
+                    Date: {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {filteredOrders.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No orders found.</p>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );

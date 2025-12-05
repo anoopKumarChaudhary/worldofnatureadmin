@@ -1,10 +1,11 @@
+// src/app/redux/features/products/productsSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface Product {
+export interface Product {
   id: string;
   title: string;
   description: string;
-  price: string;
+  price: number;
   imageUrl: string;
   category: string;
   rating: number;
@@ -12,6 +13,7 @@ interface Product {
   isBestseller?: boolean;
   isNew?: boolean;
   isOnSale?: boolean;
+  createdAt?: string;
 }
 
 interface ProductsState {
@@ -26,7 +28,7 @@ const initialState: ProductsState = {
       id: "1",
       title: "Organic Coconut Oil",
       description: "Pure organic coconut oil extracted from fresh coconuts",
-      price: "₹349",
+      price: 349,
       imageUrl: "/won1.JPG",
       category: "Oils",
       rating: 4.5,
@@ -37,7 +39,7 @@ const initialState: ProductsState = {
       id: "2",
       title: "Pure A2 Cow Ghee",
       description: "Traditional A2 cow ghee made from grass-fed cows",
-      price: "₹1,250",
+      price: 1250,
       imageUrl: "/won2.jpg",
       category: "Ghee",
       rating: 4.8,
@@ -48,7 +50,7 @@ const initialState: ProductsState = {
       id: "3",
       title: "Pure Multifloral Honey",
       description: "Raw multifloral honey from organic farms",
-      price: "₹550",
+      price: 550,
       imageUrl: "/won3.JPG",
       category: "Honey",
       rating: 4.6,
@@ -58,7 +60,7 @@ const initialState: ProductsState = {
       id: "4",
       title: "Almond Butter",
       description: "Homemade almond butter with no additives",
-      price: "₹450",
+      price: 450,
       imageUrl: "/won4.JPG",
       category: "Nut Butters",
       rating: 4.4,
@@ -68,7 +70,7 @@ const initialState: ProductsState = {
       id: "5",
       title: "Cold Pressed Olive Oil",
       description: "Extra virgin olive oil cold pressed from olives",
-      price: "₹650",
+      price: 650,
       imageUrl: "/won5.JPG",
       category: "Oils",
       rating: 4.7,
