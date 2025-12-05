@@ -1,24 +1,27 @@
 // src/app/products/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import {
+  fetchProducts,
   addProduct,
   updateProduct,
   deleteProduct,
   Product,
 } from "../redux/features/products/productsSlice";
+import { uploadApi } from "../api/upload";
 import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Upload } from "lucide-react";
 
 export default function ProductsPage() {
-  const { products } = useAppSelector((state) => state.products);
+  const { products, loading } = useAppSelector((state) => state.products);
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,6 +29,10 @@ export default function ProductsPage() {
     category: "",
     imageUrl: "",
   });
+
+  useEffect(() => {
+    dispatch(fetchProducts({}));
+  }, [dispatch]);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -57,27 +64,38 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveProduct = () => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setUploading(true);
+    try {
+      const file = e.target.files[0];
+      const response = await uploadApi.uploadFile(file);
+      setFormData({ ...formData, imageUrl: response.data.url });
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProduct = async () => {
     const priceValue = parseFloat(formData.price) || 0;
+    const productData = {
+      ...formData,
+      price: priceValue,
+    };
 
     if (editingProduct) {
-      dispatch(
+      await dispatch(
         updateProduct({
-          ...editingProduct,
-          ...formData,
-          price: priceValue,
+          id: editingProduct.id,
+          data: productData,
         })
       );
     } else {
-      const newProduct: Product = {
-        id: Date.now().toString(),
-        ...formData,
-        price: priceValue,
-        rating: 0,
-        reviewCount: 0,
-        createdAt: new Date().toISOString(),
-      };
-      dispatch(addProduct(newProduct));
+      await dispatch(addProduct(productData));
     }
     setIsModalOpen(false);
   };
@@ -121,123 +139,129 @@ export default function ProductsPage() {
 
         {/* Products Table */}
         <div className="rounded-lg bg-white shadow">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Rating
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">Loading products...</div>
+          ) : (
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Product
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Category
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Price
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Rating
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {filteredProducts.map((product) => (
+                      <tr key={product.id} className="hover:bg-gray-50">
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex items-center">
+                            <img
+                              src={product.imageUrl}
+                              alt={product.title}
+                              className="h-10 w-10 rounded-lg object-cover bg-gray-100"
+                            />
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {product.title}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {product.description.slice(0, 50)}...
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                          {product.category}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                          ₹{product.price}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                          {product.rating} ({product.reviewCount})
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Active
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleEditProduct(product)}
+                            className="text-blue-600 hover:text-blue-900 mr-4"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(product.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="md:hidden space-y-4 p-4">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="flex items-center">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.title}
-                          className="h-10 w-10 rounded-lg object-cover bg-gray-100"
-                        />
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {product.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {product.description.slice(0, 50)}...
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {product.category}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      ₹{product.price}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {product.rating} ({product.reviewCount})
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                  <div
+                    key={product.id}
+                    className="rounded-lg border border-gray-200 p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {product.title}
+                      </h3>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Active
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEditProduct(product)}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Cards View */}
-          <div className="md:hidden space-y-4 p-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="rounded-lg border border-gray-200 p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    {product.title}
-                  </h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Active
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 mb-2">{product.category}</p>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">₹{product.price}</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEditProduct(product)}
-                      className="text-blue-600"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{product.category}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold">₹{product.price}</span>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="text-blue-600"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12">
             <p className="text-gray-500">No products found.</p>
           </div>
@@ -308,16 +332,22 @@ export default function ProductsPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Image URL
+                Image
               </label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) =>
-                  setFormData({ ...formData, imageUrl: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              />
+              <div className="mt-1 flex items-center gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
+              </div>
+              {formData.imageUrl && (
+                <div className="mt-2">
+                  <img src={formData.imageUrl} alt="Preview" className="h-20 w-20 object-cover rounded-md" />
+                </div>
+              )}
             </div>
             <div className="flex justify-end space-x-3 mt-4">
               <button
@@ -328,7 +358,8 @@ export default function ProductsPage() {
               </button>
               <button
                 onClick={handleSaveProduct}
-                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+                disabled={uploading}
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400"
               >
                 {editingProduct ? "Update" : "Add"} Product
               </button>

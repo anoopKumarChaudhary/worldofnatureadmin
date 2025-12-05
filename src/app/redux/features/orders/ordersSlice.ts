@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { ordersApi } from "../../../api/orders";
 
 interface Order {
   id: string;
@@ -23,101 +24,71 @@ interface OrdersState {
 }
 
 const initialState: OrdersState = {
-  orders: [
-    {
-      id: "ORD001",
-      userId: "user1",
-      userName: "John Doe",
-      items: [
-        {
-          productId: "1",
-          title: "Organic Coconut Oil",
-          quantity: 2,
-          price: 349,
-        },
-        {
-          productId: "2",
-          title: "Pure A2 Cow Ghee",
-          quantity: 1,
-          price: 1250,
-        },
-      ],
-      total: 1948,
-      status: "delivered",
-      createdAt: "2024-01-15T10:30:00Z",
-      shippingAddress: "123 Main St, City, State 12345",
-    },
-    {
-      id: "ORD002",
-      userId: "user2",
-      userName: "Jane Smith",
-      items: [
-        {
-          productId: "3",
-          title: "Pure Multifloral Honey",
-          quantity: 1,
-          price: 550,
-        },
-      ],
-      total: 550,
-      status: "shipped",
-      createdAt: "2024-01-16T14:20:00Z",
-      shippingAddress: "456 Oak Ave, Town, State 67890",
-    },
-    {
-      id: "ORD003",
-      userId: "user3",
-      userName: "Bob Johnson",
-      items: [
-        {
-          productId: "1",
-          title: "Organic Coconut Oil",
-          quantity: 1,
-          price: 349,
-        },
-      ],
-      total: 349,
-      status: "pending",
-      createdAt: "2024-01-17T09:15:00Z",
-      shippingAddress: "789 Pine Rd, Village, State 54321",
-    },
-  ],
+  orders: [],
   loading: false,
   error: null,
 };
 
+export const fetchOrders = createAsyncThunk(
+  "orders/fetchOrders",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await ordersApi.getAll();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateOrderStatus = createAsyncThunk(
+  "orders/updateOrderStatus",
+  async (
+    { id, status }: { id: string; status: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await ordersApi.updateStatus(id, status);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const ordersSlice = createSlice({
   name: "orders",
   initialState,
-  reducers: {
-    fetchOrdersStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    fetchOrdersSuccess: (state, action: PayloadAction<Order[]>) => {
-      state.orders = action.payload;
-      state.loading = false;
-    },
-    fetchOrdersFailure: (state, action: PayloadAction<string>) => {
-      state.error = action.payload;
-      state.loading = false;
-    },
-    updateOrderStatus: (
-      state,
-      action: PayloadAction<{ id: string; status: Order["status"] }>
-    ) => {
-      const order = state.orders.find((o) => o.id === action.payload.id);
-      if (order) {
-        order.status = action.payload.status;
-      }
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchOrders.fulfilled,
+        (state, action: PayloadAction<Order[]>) => {
+          state.orders = action.payload;
+          state.loading = false;
+        }
+      )
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(
+        updateOrderStatus.fulfilled,
+        (state, action: PayloadAction<Order>) => {
+          const index = state.orders.findIndex(
+            (o) => o.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.orders[index] = action.payload;
+          }
+        }
+      );
   },
 });
 
-export const {
-  fetchOrdersStart,
-  fetchOrdersSuccess,
-  fetchOrdersFailure,
-  updateOrderStatus,
-} = ordersSlice.actions;
 export default ordersSlice.reducer;

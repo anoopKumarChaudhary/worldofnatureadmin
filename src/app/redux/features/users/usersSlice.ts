@@ -1,12 +1,14 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { usersApi } from "../../../api/users";
 
-interface User {
+export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: "user" | "admin";
   createdAt: string;
-  lastLogin: string;
+  lastLogin?: string;
   isActive: boolean;
 }
 
@@ -17,81 +19,75 @@ interface UsersState {
 }
 
 const initialState: UsersState = {
-  users: [
-    {
-      id: "user1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "user",
-      createdAt: "2024-01-01T00:00:00Z",
-      lastLogin: "2024-01-17T08:00:00Z",
-      isActive: true,
-    },
-    {
-      id: "user2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "user",
-      createdAt: "2024-01-02T00:00:00Z",
-      lastLogin: "2024-01-16T12:00:00Z",
-      isActive: true,
-    },
-    {
-      id: "user3",
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      role: "user",
-      createdAt: "2024-01-03T00:00:00Z",
-      lastLogin: "2024-01-15T10:00:00Z",
-      isActive: false,
-    },
-    {
-      id: "admin1",
-      name: "Admin User",
-      email: "admin@worldofnature.com",
-      role: "admin",
-      createdAt: "2023-12-01T00:00:00Z",
-      lastLogin: "2024-01-17T09:00:00Z",
-      isActive: true,
-    },
-  ],
+  users: [],
   loading: false,
   error: null,
 };
 
+export const fetchUsers = createAsyncThunk(
+  "users/fetchUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await usersApi.getAll();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "users/updateUser",
+  async ({ id, data }: { id: string; data: any }, { rejectWithValue }) => {
+    try {
+      const response = await usersApi.update(id, data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  "users/deleteUser",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await usersApi.delete(id);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const usersSlice = createSlice({
   name: "users",
   initialState,
-  reducers: {
-    fetchUsersStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    fetchUsersSuccess: (state, action: PayloadAction<User[]>) => {
-      state.users = action.payload;
-      state.loading = false;
-    },
-    fetchUsersFailure: (state, action: PayloadAction<string>) => {
-      state.error = action.payload;
-      state.loading = false;
-    },
-    updateUser: (state, action: PayloadAction<User>) => {
-      const index = state.users.findIndex((u) => u.id === action.payload.id);
-      if (index !== -1) {
-        state.users[index] = action.payload;
-      }
-    },
-    deleteUser: (state, action: PayloadAction<string>) => {
-      state.users = state.users.filter((u) => u.id !== action.payload);
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
+        state.users = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateUser.fulfilled, (state, action: PayloadAction<User>) => {
+        const index = state.users.findIndex((u) => u.id === action.payload.id);
+        if (index !== -1) {
+          state.users[index] = action.payload;
+        }
+      })
+      .addCase(deleteUser.fulfilled, (state, action: PayloadAction<string>) => {
+        state.users = state.users.filter((u) => u.id !== action.payload);
+      });
   },
 });
 
-export const {
-  fetchUsersStart,
-  fetchUsersSuccess,
-  fetchUsersFailure,
-  updateUser,
-  deleteUser,
-} = usersSlice.actions;
 export default usersSlice.reducer;
