@@ -15,6 +15,11 @@ export interface Product {
   isNew?: boolean;
   isOnSale?: boolean;
   createdAt?: string;
+  ingredients?: string;
+  sourcing?: string;
+  tasteProfile?: string;
+  sizes?: { value: string; label: string }[];
+  inStock?: boolean;
 }
 
 interface ProductsState {

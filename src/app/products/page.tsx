@@ -1,4 +1,3 @@
-// src/app/products/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,6 +27,11 @@ export default function ProductsPage() {
     price: "",
     category: "",
     imageUrl: "",
+    ingredients: "",
+    sourcing: "",
+    tasteProfile: "",
+    sizes: "", // Comma separated string
+    inStock: true,
   });
 
   useEffect(() => {
@@ -48,6 +52,11 @@ export default function ProductsPage() {
       price: "",
       category: "",
       imageUrl: "",
+      ingredients: "",
+      sourcing: "",
+      tasteProfile: "",
+      sizes: "",
+      inStock: true,
     });
     setIsModalOpen(true);
   };
@@ -60,6 +69,11 @@ export default function ProductsPage() {
       price: product.price.toString(),
       category: product.category,
       imageUrl: product.imageUrl,
+      ingredients: product.ingredients || "",
+      sourcing: product.sourcing || "",
+      tasteProfile: product.tasteProfile || "",
+      sizes: product.sizes ? product.sizes.map((s) => s.value).join(", ") : "",
+      inStock: product.inStock !== undefined ? product.inStock : true,
     });
     setIsModalOpen(true);
   };
@@ -82,9 +96,18 @@ export default function ProductsPage() {
 
   const handleSaveProduct = async () => {
     const priceValue = parseFloat(formData.price) || 0;
+    
+    // Parse sizes
+    const sizesArray = formData.sizes
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== "")
+      .map((s) => ({ value: s, label: s }));
+
     const productData = {
       ...formData,
       price: priceValue,
+      sizes: sizesArray,
     };
 
     if (editingProduct) {
@@ -197,8 +220,14 @@ export default function ProductsPage() {
                           {product.rating} ({product.reviewCount})
                         </td>
                         <td className="whitespace-nowrap px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              product.inStock !== false
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {product.inStock !== false ? "In Stock" : "Out of Stock"}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -232,8 +261,14 @@ export default function ProductsPage() {
                       <h3 className="text-sm font-medium text-gray-900">
                         {product.title}
                       </h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Active
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          product.inStock !== false
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {product.inStock !== false ? "In Stock" : "Out of Stock"}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mb-2">{product.category}</p>
@@ -273,7 +308,7 @@ export default function ProductsPage() {
           onClose={() => setIsModalOpen(false)}
           title={editingProduct ? "Edit Product" : "Add Product"}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Title
@@ -301,35 +336,109 @@ export default function ProductsPage() {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Price
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  required
+                />
+              </div>
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Category
+                Sizes (comma separated, e.g. 250g, 500g)
               </label>
               <input
                 type="text"
-                value={formData.category}
+                value={formData.sizes}
                 onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
+                  setFormData({ ...formData, sizes: e.target.value })
                 }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                required
+                placeholder="250g, 500g, 1kg"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Ingredients
+              </label>
+              <textarea
+                value={formData.ingredients}
+                onChange={(e) =>
+                  setFormData({ ...formData, ingredients: e.target.value })
+                }
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Sourcing
+              </label>
+              <textarea
+                value={formData.sourcing}
+                onChange={(e) =>
+                  setFormData({ ...formData, sourcing: e.target.value })
+                }
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Taste Profile
+              </label>
+              <textarea
+                value={formData.tasteProfile}
+                onChange={(e) =>
+                  setFormData({ ...formData, tasteProfile: e.target.value })
+                }
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={formData.inStock}
+                onChange={(e) =>
+                  setFormData({ ...formData, inStock: e.target.checked })
+                }
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label className="ml-2 block text-sm text-gray-900">
+                In Stock
+              </label>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Image
@@ -349,7 +458,7 @@ export default function ProductsPage() {
                 </div>
               )}
             </div>
-            <div className="flex justify-end space-x-3 mt-4">
+            <div className="flex justify-end space-x-3 mt-4 pt-4 border-t">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
