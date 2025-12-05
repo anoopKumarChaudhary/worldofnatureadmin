@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
+import { Product } from "../redux/features/products/productsSlice";
 import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
@@ -11,7 +12,7 @@ export default function ProductsPage() {
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -38,7 +39,7 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setFormData({
       title: product.title,
@@ -63,8 +64,8 @@ export default function ProductsPage() {
       });
     } else {
       // Add new product
-      const newProduct = {
-        id: Date.now(),
+      const newProduct: Product = {
+        id: Date.now().toString(),
         ...formData,
         price: parseFloat(formData.price),
         rating: 0,
@@ -76,7 +77,7 @@ export default function ProductsPage() {
     setIsModalOpen(false);
   };
 
-  const handleDeleteProduct = (productId: number) => {
+  const handleDeleteProduct = (productId: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       dispatch({ type: "products/deleteProduct", payload: productId });
     }
