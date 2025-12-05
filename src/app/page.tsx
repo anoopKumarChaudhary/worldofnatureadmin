@@ -25,7 +25,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:3001/dashboard/stats");
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const response = await fetch(`${apiUrl}/dashboard/stats`);
         const data = await response.json();
         setStatsData(data);
       } catch (error) {
