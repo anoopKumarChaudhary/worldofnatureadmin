@@ -28,8 +28,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900">
-      <div className="flex h-16 shrink-0 items-center px-6">
-        <h1 className="text-xl font-bold text-white">World of Nature Admin</h1>
+      <div className="flex h-24 shrink-0 items-center px-6 justify-center">
+        <div className="h-20 w-auto overflow-visible flex items-center justify-center">
+           <img src="/image.png" alt="Logo" className="h-full w-auto object-contain" />
+        </div>
       </div>
       <nav className="flex flex-1 flex-col px-4 py-4">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
