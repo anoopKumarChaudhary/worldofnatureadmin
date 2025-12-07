@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { useAppSelector } from "./redux/hooks"; // Not needed for stats anymore if fetching directly
 import AdminLayout from "./components/AdminLayout";
 import {
   Users,
@@ -11,6 +10,7 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
+  ArrowRight,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -43,6 +43,7 @@ export default function Dashboard() {
       icon: Package,
       change: "+12%",
       changeType: "positive",
+      color: "bg-blue-500",
     },
     {
       name: "Total Orders",
@@ -50,6 +51,7 @@ export default function Dashboard() {
       icon: ShoppingCart,
       change: "+8%",
       changeType: "positive",
+      color: "bg-[#BC5633]",
     },
     {
       name: "Total Users",
@@ -57,6 +59,7 @@ export default function Dashboard() {
       icon: Users,
       change: "+23%",
       changeType: "positive",
+      color: "bg-emerald-500",
     },
     {
       name: "Revenue",
@@ -64,111 +67,179 @@ export default function Dashboard() {
       icon: DollarSign,
       change: "-4%",
       changeType: "negative",
+      color: "bg-amber-500",
     },
   ];
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">
-            Welcome back! Here&apos;s what&apos;s happening with your store.
-          </p>
+      <div className="space-y-8 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-serif font-medium text-[#1A2118]">
+              Dashboard
+            </h1>
+            <p className="text-[#596157] mt-1">
+              Overview of your store&apos;s performance.
+            </p>
+          </div>
+          <div className="flex gap-3">
+             <button className="px-4 py-2 bg-white/60 backdrop-blur-sm border border-white/50 rounded-lg text-sm font-bold text-[#1A2118] hover:bg-white transition-all shadow-sm">
+               Download Report
+             </button>
+             <button className="px-4 py-2 bg-[#1A2118] text-white rounded-lg text-sm font-bold hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20">
+               Add Product
+             </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.name} className="rounded-lg bg-white p-6 shadow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <stat.icon className="h-8 w-8 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      {stat.name}
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {stat.value}
-                    </dd>
-                  </dl>
-                </div>
+          {stats.map((stat, idx) => (
+            <div
+              key={stat.name}
+              className="group relative overflow-hidden rounded-[1.5rem] bg-white/60 backdrop-blur-md border border-white/50 p-6 shadow-sm hover:shadow-lg transition-all duration-300"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                 <stat.icon className="w-24 h-24 text-[#1A2118]" />
               </div>
-              <div className="mt-4">
-                <div
-                  className={`flex items-center text-sm ${
-                    stat.changeType === "positive"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {stat.changeType === "positive" ? (
-                    <TrendingUp className="mr-1 h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="mr-1 h-4 w-4" />
-                  )}
-                  {stat.change}
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${stat.color}/10 text-[#1A2118]`}>
+                    <stat.icon className="h-6 w-6" />
+                  </div>
+                  <div
+                    className={`flex items-center text-xs font-bold px-2 py-1 rounded-full ${
+                      stat.changeType === "positive"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {stat.changeType === "positive" ? (
+                      <TrendingUp className="mr-1 h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="mr-1 h-3 w-3" />
+                    )}
+                    {stat.change}
+                  </div>
                 </div>
+                
+                <h3 className="text-sm font-medium text-[#596157] uppercase tracking-wider">
+                  {stat.name}
+                </h3>
+                <p className="text-3xl font-serif font-bold text-[#1A2118] mt-1">
+                  {stat.value}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Recent Orders
-            </h3>
-            <div className="space-y-4">
-              {statsData.recentOrders.length > 0 ? (
-                statsData.recentOrders.map((order: any) => (
-                  <div
-                    key={order._id}
-                    className="flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Order #{order._id.slice(-6)}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
-                        ₹{order.total}
-                      </p>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          order.status === "delivered"
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "shipped"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No recent orders</p>
-              )}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-serif font-bold text-[#1A2118]">
+                Recent Orders
+              </h3>
+              <button className="text-sm font-bold text-[#BC5633] hover:text-[#1A2118] flex items-center gap-1 transition-colors">
+                View All <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left border-b border-[#1A2118]/5">
+                    <th className="pb-4 text-xs font-bold text-[#1A2118]/40 uppercase tracking-widest">Order ID</th>
+                    <th className="pb-4 text-xs font-bold text-[#1A2118]/40 uppercase tracking-widest">Date</th>
+                    <th className="pb-4 text-xs font-bold text-[#1A2118]/40 uppercase tracking-widest">Customer</th>
+                    <th className="pb-4 text-xs font-bold text-[#1A2118]/40 uppercase tracking-widest">Status</th>
+                    <th className="pb-4 text-xs font-bold text-[#1A2118]/40 uppercase tracking-widest text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1A2118]/5">
+                  {statsData.recentOrders.length > 0 ? (
+                    statsData.recentOrders.map((order: { _id: string; createdAt: string; status: string; total: number }) => (
+                      <tr key={order._id} className="group hover:bg-white/50 transition-colors">
+                        <td className="py-4 text-sm font-bold text-[#1A2118]">
+                          #{order._id.slice(-6)}
+                        </td>
+                        <td className="py-4 text-sm text-[#596157]">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </td>
+                         <td className="py-4 text-sm text-[#1A2118]">
+                          {/* Placeholder for customer name if not available in stats */}
+                          Customer
+                        </td>
+                        <td className="py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${
+                              order.status === "delivered"
+                                ? "bg-green-100 text-green-800"
+                                : order.status === "shipped"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-4 text-sm font-bold text-[#1A2118] text-right">
+                          ₹{order.total}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-[#596157]">
+                        No recent orders found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Top Products - Placeholder/Future Implementation */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Top Products
-            </h3>
-            <div className="space-y-4">
-              <p className="text-gray-500">Coming soon...</p>
-            </div>
+          {/* Top Products / Quick Actions */}
+          <div className="space-y-6">
+             <div className="rounded-[2rem] bg-[#14281D] text-[#F2F0EA] p-8 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                   <Package className="w-32 h-32" />
+                </div>
+                <div className="relative z-10">
+                   <h3 className="text-xl font-serif font-bold mb-2">Quick Actions</h3>
+                   <p className="text-[#F2F0EA]/60 text-sm mb-6">Manage your store efficiently.</p>
+                   
+                   <div className="space-y-3">
+                      <button className="w-full py-3 bg-[#BC5633] hover:bg-[#A04628] rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#BC5633]/20">
+                         Add New Product
+                      </button>
+                      <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-colors">
+                         View All Orders
+                      </button>
+                   </div>
+                </div>
+             </div>
+             
+             <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-6 shadow-sm">
+                <h3 className="text-lg font-serif font-bold text-[#1A2118] mb-4">Top Products</h3>
+                <div className="space-y-4">
+                   {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer">
+                         <div className="w-12 h-12 bg-[#F2F0EA] rounded-lg"></div>
+                         <div>
+                            <p className="text-sm font-bold text-[#1A2118]">Product Name {i}</p>
+                            <p className="text-xs text-[#596157]">24 sales this week</p>
+                         </div>
+                         <div className="ml-auto text-sm font-bold text-[#1A2118]">₹1,200</div>
+                      </div>
+                   ))}
+                </div>
+             </div>
           </div>
         </div>
       </div>

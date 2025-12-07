@@ -1,26 +1,8 @@
-// src/app/redux/features/products/productsSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { productsApi } from "../../../api/products";
+import { Product } from "../../../types";
 
-export interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
-  isBestseller?: boolean;
-  isNew?: boolean;
-  isOnSale?: boolean;
-  createdAt?: string;
-  ingredients?: string;
-  sourcing?: string;
-  tasteProfile?: string;
-  sizes?: { value: string; label: string }[];
-  inStock?: boolean;
-}
+export type { Product };
 
 interface ProductsState {
   products: Product[];
@@ -36,36 +18,45 @@ const initialState: ProductsState = {
 
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
-  async (params: any = {}, { rejectWithValue }) => {
+  async (params: Record<string, unknown> = {}, { rejectWithValue }) => {
     try {
       const response = await productsApi.getAll(params);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
 
 export const addProduct = createAsyncThunk(
   "products/addProduct",
-  async (productData: any, { rejectWithValue }) => {
+  async (productData: Partial<Product>, { rejectWithValue }) => {
     try {
       const response = await productsApi.create(productData);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
 
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({ id, data }: { id: string; data: any }, { rejectWithValue }) => {
+  async ({ id, data }: { id: string; data: Partial<Product> }, { rejectWithValue }) => {
     try {
       const response = await productsApi.update(id, data);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
@@ -76,8 +67,11 @@ export const deleteProduct = createAsyncThunk(
     try {
       await productsApi.delete(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );

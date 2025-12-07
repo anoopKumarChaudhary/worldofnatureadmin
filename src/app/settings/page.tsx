@@ -24,26 +24,35 @@ export default function SettingsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600">
-            Manage your store settings and preferences
-          </p>
+      <div className="space-y-8 animate-fade-in pb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-serif font-medium text-[#1A2118]">Settings</h1>
+            <p className="text-[#596157] mt-1">Manage your store preferences</p>
+          </div>
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 rounded-xl bg-[#1A2118] px-5 py-2.5 text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 font-bold text-sm"
+          >
+            <Save className="h-4 w-4" />
+            Save Changes
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Store Information */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="flex items-center mb-4">
-              <User className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-8 shadow-sm">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-[#BC5633]/10 rounded-lg mr-3">
+                 <User className="h-5 w-5 text-[#BC5633]" />
+              </div>
+              <h3 className="text-lg font-serif font-bold text-[#1A2118]">
                 Store Information
               </h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
                   Store Name
                 </label>
                 <input
@@ -52,11 +61,11 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, storeName: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
                   Email
                 </label>
                 <input
@@ -65,22 +74,27 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, email: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Notifications */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="flex items-center mb-4">
-              <Bell className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-8 shadow-sm">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-[#5A7D6B]/10 rounded-lg mr-3">
+                 <Bell className="h-5 w-5 text-[#5A7D6B]" />
+              </div>
+              <h3 className="text-lg font-serif font-bold text-[#1A2118]">
                 Notifications
               </h3>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center">
+              <div className="flex items-center justify-between p-3 bg-white/40 rounded-xl border border-[#1A2118]/5">
+                <label className="text-sm font-bold text-[#1A2118]">
+                  Email notifications
+                </label>
                 <input
                   type="checkbox"
                   checked={settings.notifications.email}
@@ -93,13 +107,13 @@ export default function SettingsPage() {
                       },
                     })
                   }
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded"
                 />
-                <label className="ml-2 block text-sm text-gray-900">
-                  Email notifications
-                </label>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center justify-between p-3 bg-white/40 rounded-xl border border-[#1A2118]/5">
+                <label className="text-sm font-bold text-[#1A2118]">
+                  Push notifications
+                </label>
                 <input
                   type="checkbox"
                   checked={settings.notifications.push}
@@ -112,13 +126,13 @@ export default function SettingsPage() {
                       },
                     })
                   }
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded"
                 />
-                <label className="ml-2 block text-sm text-gray-900">
-                  Push notifications
-                </label>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center justify-between p-3 bg-white/40 rounded-xl border border-[#1A2118]/5">
+                <label className="text-sm font-bold text-[#1A2118]">
+                  SMS notifications
+                </label>
                 <input
                   type="checkbox"
                   checked={settings.notifications.sms}
@@ -131,24 +145,23 @@ export default function SettingsPage() {
                       },
                     })
                   }
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded"
                 />
-                <label className="ml-2 block text-sm text-gray-900">
-                  SMS notifications
-                </label>
               </div>
             </div>
           </div>
 
           {/* Appearance */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="flex items-center mb-4">
-              <Palette className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">Appearance</h3>
+          <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-8 shadow-sm">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-[#E0C075]/10 rounded-lg mr-3">
+                 <Palette className="h-5 w-5 text-[#E0C075]" />
+              </div>
+              <h3 className="text-lg font-serif font-bold text-[#1A2118]">Appearance</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
                   Theme
                 </label>
                 <select
@@ -156,7 +169,7 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, theme: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
                 >
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
@@ -164,7 +177,7 @@ export default function SettingsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
                   Language
                 </label>
                 <select
@@ -172,7 +185,7 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, language: e.target.value })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -183,31 +196,22 @@ export default function SettingsPage() {
           </div>
 
           {/* Security */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="flex items-center mb-4">
-              <Shield className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">Security</h3>
+          <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-8 shadow-sm">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-[#1A2118]/10 rounded-lg mr-3">
+                 <Shield className="h-5 w-5 text-[#1A2118]" />
+              </div>
+              <h3 className="text-lg font-serif font-bold text-[#1A2118]">Security</h3>
             </div>
             <div className="space-y-4">
-              <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#1A2118] hover:bg-[#BC5633] transition-colors">
                 Change Password
               </button>
-              <button className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button className="w-full flex justify-center py-3 px-4 border border-[#1A2118]/10 rounded-xl shadow-sm text-sm font-bold text-[#1A2118] bg-white hover:bg-[#F2F0EA] transition-colors">
                 Enable Two-Factor Authentication
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            <Save className="h-4 w-4" />
-            Save Changes
-          </button>
         </div>
       </div>
     </AdminLayout>

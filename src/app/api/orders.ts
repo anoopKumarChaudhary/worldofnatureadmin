@@ -1,9 +1,10 @@
 import client from "./client";
+import { Order } from "../types";
 
 export const ordersApi = {
-  getAll: () => client.get("/orders"),
-  getOne: (id: string) => client.get(`/orders/${id}`),
-  create: (data: any) => client.post("/orders", data),
+  getAll: () => client.get<Order[]>("/orders"),
+  getOne: (id: string) => client.get<Order>(`/orders/${id}`),
+  create: (data: Partial<Order>) => client.post<Order>("/orders", data),
   updateStatus: (id: string, status: string) =>
-    client.put(`/orders/${id}/status`, { status }),
+    client.put<Order>(`/orders/${id}/status`, { status }),
 };

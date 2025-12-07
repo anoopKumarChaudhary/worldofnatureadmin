@@ -1,21 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { ordersApi } from "../../../api/orders";
-
-interface Order {
-  id: string;
-  userId: string;
-  userName: string;
-  items: Array<{
-    productId: string;
-    title: string;
-    quantity: number;
-    price: number;
-  }>;
-  total: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  createdAt: string;
-  shippingAddress: string;
-}
+import { Order } from "../../../types";
 
 interface OrdersState {
   orders: Order[];
@@ -35,8 +20,11 @@ export const fetchOrders = createAsyncThunk(
     try {
       const response = await ordersApi.getAll();
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
@@ -50,8 +38,11 @@ export const updateOrderStatus = createAsyncThunk(
     try {
       const response = await ordersApi.updateStatus(id, status);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );

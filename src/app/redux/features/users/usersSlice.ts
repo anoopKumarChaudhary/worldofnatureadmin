@@ -1,16 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { usersApi } from "../../../api/users";
+import { User } from "../../../types";
 
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: "user" | "admin";
-  createdAt: string;
-  lastLogin?: string;
-  isActive: boolean;
-}
+export type { User };
 
 interface UsersState {
   users: User[];
@@ -30,20 +22,26 @@ export const fetchUsers = createAsyncThunk(
     try {
       const response = await usersApi.getAll();
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
 
 export const updateUser = createAsyncThunk(
   "users/updateUser",
-  async ({ id, data }: { id: string; data: any }, { rejectWithValue }) => {
+  async ({ id, data }: { id: string; data: Partial<User> }, { rejectWithValue }) => {
     try {
       const response = await usersApi.update(id, data);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );
@@ -54,8 +52,11 @@ export const deleteUser = createAsyncThunk(
     try {
       await usersApi.delete(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unknown error occurred");
     }
   }
 );

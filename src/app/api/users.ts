@@ -1,9 +1,10 @@
 import client from "./client";
+import { User } from "../types";
 
 export const usersApi = {
-  getAll: () => client.get("/users"),
-  getOne: (id: string) => client.get(`/users/${id}`),
-  create: (data: any) => client.post("/users", data),
-  update: (id: string, data: any) => client.put(`/users/${id}`, data),
+  getAll: () => client.get<User[]>("/users"),
+  getOne: (id: string) => client.get<User>(`/users/${id}`),
+  create: (data: Partial<User>) => client.post<User>("/users", data),
+  update: (id: string, data: Partial<User>) => client.put<User>(`/users/${id}`, data),
   delete: (id: string) => client.delete(`/users/${id}`),
 };

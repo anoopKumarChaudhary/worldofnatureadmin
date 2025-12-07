@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -15,17 +16,28 @@ export default function Modal({
   title,
   children,
 }: ModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div
-            className="absolute inset-0 bg-gray-500 opacity-75"
-            onClick={onClose}
-          ></div>
-        </div>
+        {/* Overlay */}
+        <div
+          className="fixed inset-0 transition-opacity bg-[#14281D]/60 backdrop-blur-sm"
+          aria-hidden="true"
+          onClick={onClose}
+        ></div>
 
         <span
           className="hidden sm:inline-block sm:align-middle sm:h-screen"
@@ -34,17 +46,19 @@ export default function Modal({
           &#8203;
         </span>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+        {/* Modal Content */}
+        <div className="inline-block align-bottom bg-[#F2F0EA] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10 border border-white/50">
+          <div className="px-6 py-5 border-b border-[#1A2118]/10 flex items-center justify-between bg-white/50 backdrop-blur-md">
+            <h3 className="text-xl font-serif font-bold text-[#1A2118]">{title}</h3>
+            <button
+              onClick={onClose}
+              className="text-[#1A2118]/40 hover:text-[#BC5633] transition-colors p-1 rounded-full hover:bg-[#1A2118]/5"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="px-6 py-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
             {children}
           </div>
         </div>
