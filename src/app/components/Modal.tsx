@@ -47,7 +47,7 @@ export default function Modal({
         </span>
 
         {/* Modal Content */}
-        <div className="inline-block align-bottom bg-[#F2F0EA] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10 border border-white/50">
+        <div className="inline-block align-bottom bg-[#F2F0EA] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full relative z-10 border border-white/50">
           <div className="px-6 py-5 border-b border-[#1A2118]/10 flex items-center justify-between bg-white/50 backdrop-blur-md">
             <h3 className="text-xl font-serif font-bold text-[#1A2118]">{title}</h3>
             <button

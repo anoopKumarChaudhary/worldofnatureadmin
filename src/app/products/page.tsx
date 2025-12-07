@@ -25,6 +25,7 @@ export default function ProductsPage() {
     title: "",
     description: "",
     price: "",
+    originalPrice: "",
     category: "",
     imageUrl: "",
     ingredients: "",
@@ -50,6 +51,7 @@ export default function ProductsPage() {
       title: "",
       description: "",
       price: "",
+      originalPrice: "",
       category: "",
       imageUrl: "",
       ingredients: "",
@@ -67,6 +69,7 @@ export default function ProductsPage() {
       title: product.title,
       description: product.description,
       price: product.price.toString(),
+      originalPrice: product.originalPrice ? product.originalPrice.toString() : "",
       category: product.category,
       imageUrl: product.imageUrl,
       ingredients: product.ingredients || "",
@@ -96,6 +99,7 @@ export default function ProductsPage() {
 
   const handleSaveProduct = async () => {
     const priceValue = parseFloat(formData.price) || 0;
+    const originalPriceValue = parseFloat(formData.originalPrice) || 0;
     
     // Parse sizes
     const sizesArray = formData.sizes
@@ -107,6 +111,8 @@ export default function ProductsPage() {
     const productData = {
       ...formData,
       price: priceValue,
+      originalPrice: originalPriceValue > 0 ? originalPriceValue : undefined,
+      isOnSale: originalPriceValue > priceValue,
       sizes: sizesArray,
     };
 
@@ -329,10 +335,11 @@ export default function ProductsPage() {
           onClose={() => setIsModalOpen(false)}
           title={editingProduct ? "Edit Product" : "Add Product"}
         >
-          <div className="space-y-5">
+          <div className="space-y-8">
+            {/* Title - Full Width */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Title
+                Product Title
               </label>
               <input
                 type="text"
@@ -340,162 +347,226 @@ export default function ProductsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors text-lg font-bold text-[#1A2118] placeholder:font-normal"
+                placeholder="e.g. A2 Cow Ghee"
                 required
               />
             </div>
-            
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={3}
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-              />
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                  Price (₹)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Sizes <span className="text-[#1A2118]/30 normal-case font-normal">(comma separated)</span>
-              </label>
-              <input
-                type="text"
-                value={formData.sizes}
-                onChange={(e) =>
-                  setFormData({ ...formData, sizes: e.target.value })
-                }
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                placeholder="250g, 500g, 1kg"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              {/* Left Column: Image & Key Info (Span 4) */}
+              <div className="md:col-span-4 space-y-6">
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                    Product Image
+                  </label>
+                  <div 
+                    className={`relative aspect-square rounded-2xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
+                      !formData.imageUrl ? "bg-white shadow-sm" : "bg-white shadow-sm"
+                    }`}
+                  >
+                    {formData.imageUrl ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={formData.imageUrl} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <p className="text-white text-xs font-bold uppercase tracking-widest">Change Image</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[#1A2118]/40">
+                        {uploading ? (
+                          <Loader2 className="w-8 h-8 animate-spin text-[#BC5633]" />
+                        ) : (
+                          <>
+                            <div className="w-12 h-12 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2">
+                               <Plus className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-widest">Upload</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Ingredients
-              </label>
-              <textarea
-                value={formData.ingredients}
-                onChange={(e) =>
-                  setFormData({ ...formData, ingredients: e.target.value })
-                }
-                rows={2}
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-              />
-            </div>
+                {/* Pricing Card */}
+                <div className="bg-white rounded-2xl p-5 space-y-5 border border-[#1A2118]/5 shadow-sm">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      Selling Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors font-bold text-[#1A2118]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      Original Price (MRP)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.originalPrice}
+                      onChange={(e) =>
+                        setFormData({ ...formData, originalPrice: e.target.value })
+                      }
+                      placeholder="Optional"
+                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                    />
+                  </div>
+                  
+                  {/* Discount Badge */}
+                  {formData.price && formData.originalPrice && parseFloat(formData.originalPrice) > parseFloat(formData.price) && (
+                     <div className="pt-3 border-t border-[#1A2118]/5 flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#1A2118]/60">Discount</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold">
+                           {Math.round(((parseFloat(formData.originalPrice) - parseFloat(formData.price)) / parseFloat(formData.originalPrice)) * 100)}% OFF
+                        </span>
+                     </div>
+                  )}
+                </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Sourcing
-              </label>
-              <textarea
-                value={formData.sourcing}
-                onChange={(e) =>
-                  setFormData({ ...formData, sourcing: e.target.value })
-                }
-                rows={2}
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Taste Profile
-              </label>
-              <textarea
-                value={formData.tasteProfile}
-                onChange={(e) =>
-                  setFormData({ ...formData, tasteProfile: e.target.value })
-                }
-                rows={2}
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white/50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-              />
-            </div>
-
-            <div className="flex items-center p-4 bg-[#F2F0EA] rounded-xl border border-[#1A2118]/5">
-              <input
-                type="checkbox"
-                checked={formData.inStock}
-                onChange={(e) =>
-                  setFormData({ ...formData, inStock: e.target.checked })
-                }
-                className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded"
-              />
-              <label className="ml-3 block text-sm font-bold text-[#1A2118]">
-                Available In Stock
-              </label>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Product Image
-              </label>
-              <div className="mt-1 flex items-center gap-4 p-4 border-2 border-dashed border-[#1A2118]/10 rounded-xl hover:border-[#BC5633]/50 transition-colors bg-white/50">
-                <div className="flex-1">
-                   <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="block w-full text-sm text-[#596157] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-[#1A2118] file:text-white hover:file:bg-[#BC5633] transition-all cursor-pointer"
+                {/* Category */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                    required
                   />
                 </div>
-                {uploading && <Loader2 className="w-5 h-5 animate-spin text-[#BC5633]" />}
-              </div>
-              {formData.imageUrl && (
-                <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden shadow-md border border-[#1A2118]/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+
+                {/* Stock Toggle */}
+                <div className="flex items-center p-4 bg-white rounded-xl border border-[#1A2118]/5 shadow-sm cursor-pointer hover:border-[#BC5633]/30 transition-colors" onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}>
+                  <input
+                    type="checkbox"
+                    checked={formData.inStock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, inStock: e.target.checked })
+                    }
+                    className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded cursor-pointer"
+                  />
+                  <label className="ml-3 block text-sm font-bold text-[#1A2118] cursor-pointer select-none">
+                    Available In Stock
+                  </label>
                 </div>
-              )}
+              </div>
+
+              {/* Right Column: Details (Span 8) */}
+              <div className="md:col-span-8 space-y-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    rows={4}
+                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                    Sizes <span className="text-[#1A2118]/30 normal-case font-normal">(comma separated)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.sizes}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sizes: e.target.value })
+                    }
+                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                    placeholder="250g, 500g, 1kg"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-[#1A2118]/5">
+                   <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      Ingredients
+                    </label>
+                    <textarea
+                      value={formData.ingredients}
+                      onChange={(e) =>
+                        setFormData({ ...formData, ingredients: e.target.value })
+                      }
+                      rows={2}
+                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Sourcing
+                      </label>
+                      <textarea
+                        value={formData.sourcing}
+                        onChange={(e) =>
+                          setFormData({ ...formData, sourcing: e.target.value })
+                        }
+                        rows={3}
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Taste Profile
+                      </label>
+                      <textarea
+                        value={formData.tasteProfile}
+                        onChange={(e) =>
+                          setFormData({ ...formData, tasteProfile: e.target.value })
+                        }
+                        rows={3}
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <div className="flex justify-end space-x-3 mt-8 pt-4 border-t border-[#1A2118]/10">
+            <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-[#1A2118]/10">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-[#1A2118] hover:bg-[#1A2118]/5 transition-colors"
+                className="px-6 py-3 rounded-xl text-sm font-bold text-[#1A2118] hover:bg-[#1A2118]/5 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveProduct}
                 disabled={uploading}
-                className="px-5 py-2.5 bg-[#1A2118] rounded-xl text-sm font-bold text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-[#1A2118] rounded-xl text-sm font-bold text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {editingProduct ? "Update Product" : "Create Product"}
               </button>
