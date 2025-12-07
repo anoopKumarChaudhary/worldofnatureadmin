@@ -1,5 +1,5 @@
 export interface Product {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   price: number;
@@ -19,7 +19,7 @@ export interface Product {
 }
 
 export interface Order {
-  id: string;
+  _id: string;
   userId: string;
   userName: string;
   items: Array<{
@@ -35,7 +35,7 @@ export interface Order {
 }
 
 export interface User {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;

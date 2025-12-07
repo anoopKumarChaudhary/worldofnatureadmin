@@ -80,7 +80,7 @@ export default function UsersPage() {
                   </thead>
                   <tbody className="divide-y divide-[#1A2118]/5">
                     {filteredUsers.map((user) => (
-                      <tr key={user.id} className="group hover:bg-white/50 transition-colors">
+                      <tr key={user._id} className="group hover:bg-white/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                              <div className="w-8 h-8 rounded-full bg-[#BC5633]/10 flex items-center justify-center text-xs font-bold text-[#BC5633]">
@@ -136,7 +136,7 @@ export default function UsersPage() {
               <div className="md:hidden space-y-4 p-4">
                 {filteredUsers.map((user) => (
                   <div
-                    key={user.id}
+                    key={user._id}
                     className="rounded-xl bg-white/50 border border-[#1A2118]/5 p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">

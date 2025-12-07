@@ -80,13 +80,13 @@ const usersSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(updateUser.fulfilled, (state, action: PayloadAction<User>) => {
-        const index = state.users.findIndex((u) => u.id === action.payload.id);
+        const index = state.users.findIndex((u) => u._id === action.payload._id);
         if (index !== -1) {
           state.users[index] = action.payload;
         }
       })
       .addCase(deleteUser.fulfilled, (state, action: PayloadAction<string>) => {
-        state.users = state.users.filter((u) => u.id !== action.payload);
+        state.users = state.users.filter((u) => u._id !== action.payload);
       });
   },
 });

@@ -107,7 +107,7 @@ const productsSlice = createSlice({
         updateProduct.fulfilled,
         (state, action: PayloadAction<Product>) => {
           const index = state.products.findIndex(
-            (p) => p.id === action.payload.id
+            (p) => p._id === action.payload._id
           );
           if (index !== -1) {
             state.products[index] = action.payload;
@@ -116,7 +116,7 @@ const productsSlice = createSlice({
       )
       // Delete Product
       .addCase(deleteProduct.fulfilled, (state, action: PayloadAction<string>) => {
-        state.products = state.products.filter((p) => p.id !== action.payload);
+        state.products = state.products.filter((p) => p._id !== action.payload);
       });
   },
 });

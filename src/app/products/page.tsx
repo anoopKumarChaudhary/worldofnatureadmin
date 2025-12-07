@@ -113,7 +113,7 @@ export default function ProductsPage() {
     if (editingProduct) {
       await dispatch(
         updateProduct({
-          id: editingProduct.id,
+          id: editingProduct._id,
           data: productData,
         })
       );
@@ -194,7 +194,7 @@ export default function ProductsPage() {
                   </thead>
                   <tbody className="divide-y divide-[#1A2118]/5">
                     {filteredProducts.map((product, index) => (
-                      <tr key={`${product.id}-${index}`} className="group hover:bg-white/50 transition-colors">
+                      <tr key={`${product._id}-${index}`} className="group hover:bg-white/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="h-12 w-12 rounded-lg overflow-hidden bg-[#F2F0EA] border border-[#1A2118]/5 shrink-0">
@@ -249,7 +249,7 @@ export default function ProductsPage() {
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteProduct(product.id)}
+                              onClick={() => handleDeleteProduct(product._id)}
                               className="p-2 text-[#1A2118]/60 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -266,7 +266,7 @@ export default function ProductsPage() {
               <div className="md:hidden space-y-4 p-4">
                 {filteredProducts.map((product, index) => (
                   <div
-                    key={`${product.id}-${index}`}
+                    key={`${product._id}-${index}`}
                     className="rounded-xl bg-white/50 border border-[#1A2118]/5 p-4 shadow-sm"
                   >
                     <div className="flex items-start gap-4 mb-3">
@@ -299,7 +299,7 @@ export default function ProductsPage() {
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product._id)}
                           className="p-2 text-[#1A2118]/60 hover:text-red-600"
                         >
                           <Trash2 className="h-4 w-4" />
