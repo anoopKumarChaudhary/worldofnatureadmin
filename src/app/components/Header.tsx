@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, User, Menu } from "lucide-react";
+import { Bell, User, Menu } from "lucide-react";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -19,16 +19,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </button>
         )}
         
-        {/* Search Bar */}
-        <div className="relative group max-w-md w-full hidden sm:block">
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-xl rounded-full shadow-sm border border-white/50 transition-all group-focus-within:border-[#BC5633]/30 group-focus-within:shadow-md" />
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1A2118]/40 w-4 h-4 group-focus-within:text-[#BC5633] transition-colors z-10" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="relative z-10 w-full bg-transparent border-none rounded-full py-2.5 pl-10 pr-4 text-sm font-medium text-[#1A2118] placeholder-[#1A2118]/40 focus:ring-0 transition-all outline-none"
-          />
-        </div>
+
       </div>
 
       <div className="flex items-center gap-4">

@@ -58,7 +58,10 @@ export default function Modal({
             </button>
           </div>
           
-          <div className="px-8 py-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
+          <div 
+            className="px-8 py-8 max-h-[85vh] overflow-y-auto custom-scrollbar"
+            data-lenis-prevent
+          >
             {children}
           </div>
         </div>
