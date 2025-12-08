@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -122,6 +123,15 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-bold text-[#BC5633] hover:text-[#A04628] transition-colors"
+                >
+                  Forgot Password?
+                </Link>
               </div>
             </div>
 
