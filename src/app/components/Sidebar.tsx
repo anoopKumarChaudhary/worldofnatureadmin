@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -80,7 +81,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
           
           <li className="mt-auto">
             <div className="h-px bg-[#F2F0EA]/10 my-4" />
-            <button className="group flex w-full gap-x-3 rounded-xl p-3 text-sm font-medium text-[#F2F0EA]/70 hover:bg-[#8F4F3D]/20 hover:text-[#EBB09E] transition-all">
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="group flex w-full gap-x-3 rounded-xl p-3 text-sm font-medium text-[#F2F0EA]/70 hover:bg-[#8F4F3D]/20 hover:text-[#EBB09E] transition-all"
+            >
               <LogOut className="h-5 w-5 shrink-0" aria-hidden="true" />
               Logout
             </button>
