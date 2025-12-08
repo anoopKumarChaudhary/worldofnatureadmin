@@ -336,34 +336,17 @@ export default function ProductsPage() {
           title={editingProduct ? "Edit Product" : "Add Product"}
         >
           <div className="space-y-8">
-            {/* Title - Full Width */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                Product Title
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors text-lg font-bold text-[#1A2118] placeholder:font-normal"
-                placeholder="e.g. A2 Cow Ghee"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              {/* Left Column: Image & Key Info (Span 4) */}
-              <div className="md:col-span-4 space-y-6">
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column: Image & Key Info */}
+              <div className="space-y-6">
+                {/* Image Upload Card */}
+                <div className="bg-white p-4 rounded-2xl border border-[#1A2118]/5 shadow-sm">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-3">
                     Product Image
                   </label>
                   <div 
-                    className={`relative aspect-square rounded-2xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
-                      !formData.imageUrl ? "bg-white shadow-sm" : "bg-white shadow-sm"
+                    className={`relative aspect-square rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
+                      !formData.imageUrl ? "bg-[#F2F0EA]" : "bg-white"
                     }`}
                   >
                     {formData.imageUrl ? (
@@ -374,7 +357,7 @@ export default function ProductsPage() {
                           alt="Preview" 
                           className="w-full h-full object-cover" 
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                            <p className="text-white text-xs font-bold uppercase tracking-widest">Change Image</p>
                         </div>
                       </>
@@ -384,10 +367,10 @@ export default function ProductsPage() {
                           <Loader2 className="w-8 h-8 animate-spin text-[#BC5633]" />
                         ) : (
                           <>
-                            <div className="w-12 h-12 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2">
-                               <Plus className="w-6 h-6" />
+                            <div className="w-10 h-10 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2 group-hover:bg-[#BC5633]/10 group-hover:text-[#BC5633] transition-colors">
+                               <Plus className="w-5 h-5" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-widest">Upload</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Upload</span>
                           </>
                         )}
                       </div>
@@ -401,37 +384,43 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* Pricing Card */}
-                <div className="bg-white rounded-2xl p-5 space-y-5 border border-[#1A2118]/5 shadow-sm">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                      Selling Price (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors font-bold text-[#1A2118]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                      Original Price (MRP)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.originalPrice}
-                      onChange={(e) =>
-                        setFormData({ ...formData, originalPrice: e.target.value })
-                      }
-                      placeholder="Optional"
-                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                    />
+                {/* Pricing & Inventory Card */}
+                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                    Pricing & Inventory
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Selling Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors font-bold text-[#1A2118]"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Original Price (MRP)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.originalPrice}
+                        onChange={(e) =>
+                          setFormData({ ...formData, originalPrice: e.target.value })
+                        }
+                        placeholder="Optional"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                      />
+                    </div>
                   </div>
                   
                   {/* Discount Badge */}
@@ -443,120 +432,153 @@ export default function ProductsPage() {
                         </span>
                      </div>
                   )}
-                </div>
 
-                {/* Category */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                    Category
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                    required
-                  />
-                </div>
-
-                {/* Stock Toggle */}
-                <div className="flex items-center p-4 bg-white rounded-xl border border-[#1A2118]/5 shadow-sm cursor-pointer hover:border-[#BC5633]/30 transition-colors" onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}>
-                  <input
-                    type="checkbox"
-                    checked={formData.inStock}
-                    onChange={(e) =>
-                      setFormData({ ...formData, inStock: e.target.checked })
-                    }
-                    className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded cursor-pointer"
-                  />
-                  <label className="ml-3 block text-sm font-bold text-[#1A2118] cursor-pointer select-none">
-                    Available In Stock
-                  </label>
+                  {/* Stock Toggle */}
+                  <div className="pt-2">
+                    <div className="flex items-center p-3 bg-[#F2F0EA]/50 rounded-xl border border-[#1A2118]/5 cursor-pointer hover:border-[#BC5633]/30 transition-colors" onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}>
+                      <input
+                        type="checkbox"
+                        checked={formData.inStock}
+                        onChange={(e) =>
+                          setFormData({ ...formData, inStock: e.target.checked })
+                        }
+                        className="h-4 w-4 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded cursor-pointer"
+                      />
+                      <label className="ml-3 block text-xs font-bold uppercase tracking-wider text-[#1A2118] cursor-pointer select-none">
+                        In Stock
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: Details (Span 8) */}
-              <div className="md:col-span-8 space-y-6">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    rows={4}
-                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                    Sizes <span className="text-[#1A2118]/30 normal-case font-normal">(comma separated)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sizes}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sizes: e.target.value })
-                    }
-                    className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                    placeholder="250g, 500g, 1kg"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 pt-4 border-t border-[#1A2118]/5">
-                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                      Ingredients
-                    </label>
-                    <textarea
-                      value={formData.ingredients}
-                      onChange={(e) =>
-                        setFormData({ ...formData, ingredients: e.target.value })
-                      }
-                      rows={2}
-                      className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+              {/* Right Column: Product Details */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Info Card */}
+                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                    Basic Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Product Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors text-lg font-bold text-[#1A2118] placeholder:font-normal"
+                        placeholder="e.g. A2 Cow Ghee"
+                        required
+                      />
+                    </div>
+                    
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                        Sourcing
+                        Category
                       </label>
-                      <textarea
-                        value={formData.sourcing}
+                      <input
+                        type="text"
+                        value={formData.category}
                         onChange={(e) =>
-                          setFormData({ ...formData, sourcing: e.target.value })
+                          setFormData({ ...formData, category: e.target.value })
                         }
-                        rows={3}
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        required
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
-                        Taste Profile
+                        Sizes <span className="text-[#1A2118]/30 normal-case font-normal">(comma separated)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.sizes}
+                        onChange={(e) =>
+                          setFormData({ ...formData, sizes: e.target.value })
+                        }
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        placeholder="250g, 500g, 1kg"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Description
                       </label>
                       <textarea
-                        value={formData.tasteProfile}
+                        value={formData.description}
                         onChange={(e) =>
-                          setFormData({ ...formData, tasteProfile: e.target.value })
+                          setFormData({ ...formData, description: e.target.value })
                         }
                         rows={3}
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors resize-none"
                       />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detailed Info Card */}
+                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                    Product Details
+                  </h3>
+
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        Ingredients
+                      </label>
+                      <textarea
+                        value={formData.ingredients}
+                        onChange={(e) =>
+                          setFormData({ ...formData, ingredients: e.target.value })
+                        }
+                        rows={2}
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                          Sourcing
+                        </label>
+                        <textarea
+                          value={formData.sourcing}
+                          onChange={(e) =>
+                            setFormData({ ...formData, sourcing: e.target.value })
+                          }
+                          rows={3}
+                          className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                          Taste Profile
+                        </label>
+                        <textarea
+                          value={formData.tasteProfile}
+                          onChange={(e) =>
+                            setFormData({ ...formData, tasteProfile: e.target.value })
+                          }
+                          rows={3}
+                          className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-[#1A2118]/10">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-[#1A2118]/10">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-6 py-3 rounded-xl text-sm font-bold text-[#1A2118] hover:bg-[#1A2118]/5 transition-colors"
