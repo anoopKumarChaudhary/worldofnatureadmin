@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { dashboardApi } from "./api/dashboard";
 import { Order } from "./types";
+import RevenueChart from "./components/dashboard/RevenueChart";
+import OrdersChart from "./components/dashboard/OrdersChart";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -111,6 +113,16 @@ export default function Dashboard() {
   return (
     <AdminLayout>
       <div className="space-y-8 animate-fade-in">
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <RevenueChart />
+          </div>
+          <div>
+            <OrdersChart />
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-serif font-medium text-[#1A2118]">
