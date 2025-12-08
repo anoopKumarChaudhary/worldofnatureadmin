@@ -66,6 +66,9 @@ const handler = NextAuth({
   pages: {
     signIn: "/login",
   },
+  session: {
+    maxAge: 24 * 60 * 60, 
+  },
 });
 
 export { handler as GET, handler as POST };
