@@ -21,8 +21,8 @@ export interface Product {
 
 export interface Order {
   _id: string;
-  userId: string;
-  userName: string;
+  userId?: string;
+  userName?: string;
   items: Array<{
     productId: string;
     title: string;
@@ -33,6 +33,16 @@ export interface Order {
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   createdAt: string;
   shippingAddress: string;
+  shippingInfo?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
 }
 
 export interface User {

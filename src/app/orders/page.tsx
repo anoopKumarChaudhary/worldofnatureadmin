@@ -18,7 +18,9 @@ export default function OrdersPage() {
   const filteredOrders = orders.filter(
     (order) =>
       order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.userName.toLowerCase().includes(searchTerm.toLowerCase())
+      (order.userName && order.userName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.shippingInfo && 
+        (`${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`).toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -87,9 +89,9 @@ export default function OrdersPage() {
                         <td className="px-6 py-4 text-sm text-[#596157]">
                           <div className="flex items-center gap-2">
                              <div className="w-6 h-6 rounded-full bg-[#1A2118]/5 flex items-center justify-center text-xs font-bold text-[#1A2118]">
-                                {(order.userName || "U").charAt(0)}
+                                {(order.userName || order.shippingInfo?.firstName || "G").charAt(0)}
                              </div>
-                             {order.userName || "Unknown User"}
+                             {order.userName || (order.shippingInfo ? `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` : "Guest")}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm font-bold text-[#1A2118]">
@@ -160,7 +162,9 @@ export default function OrdersPage() {
                     <div className="space-y-2 text-sm text-[#596157]">
                       <div className="flex justify-between">
                          <span>Customer</span>
-                         <span className="font-medium text-[#1A2118]">{order.userName || "Unknown User"}</span>
+                         <span className="font-medium text-[#1A2118]">
+                            {order.userName || (order.shippingInfo ? `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` : "Guest")}
+                         </span>
                       </div>
                       <div className="flex justify-between">
                          <span>Date</span>
