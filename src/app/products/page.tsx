@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import {
@@ -15,7 +15,7 @@ import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 
-export default function ProductsPage() {
+function ProductsContent() {
   const { products, loading } = useAppSelector((state) => state.products);
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
@@ -605,5 +605,13 @@ export default function ProductsPage() {
         </Modal>
       </div>
     </AdminLayout>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#BC5633]" /></div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }
