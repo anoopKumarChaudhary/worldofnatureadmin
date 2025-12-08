@@ -18,14 +18,14 @@
 
 - [x] Sidebar navigation
 - [x] Header with user info
-- [ ] Data tables for products/orders/users
+- [x] Data tables for products/orders/users
 - [ ] Forms for adding/editing
 - [ ] Charts for dashboard
 
 ## Phase 4: Features
 
 - [ ] Authentication (login page)
-- [ ] API integration
+- [x] API integration
 - [ ] Search and filtering
 - [ ] Pagination
 

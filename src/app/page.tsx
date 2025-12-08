@@ -13,6 +13,8 @@ import {
   TrendingDown,
   ArrowRight,
 } from "lucide-react";
+import { dashboardApi } from "./api/dashboard";
+import { Order } from "./types";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function Dashboard() {
     totalProducts: 0,
     totalUsers: 0,
     totalRevenue: 0,
-    recentOrders: [],
+    recentOrders: [] as Order[],
   });
 
   const handleDownloadReport = () => {
@@ -31,7 +33,7 @@ export default function Dashboard() {
     }
 
     const headers = ["Order ID", "Date", "Status", "Total"];
-    const rows = statsData.recentOrders.map((order: any) => [
+    const rows = statsData.recentOrders.map((order: Order) => [
       order._id,
       new Date(order.createdAt).toLocaleDateString(),
       order.status,
@@ -62,10 +64,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-        const response = await fetch(`${apiUrl}/dashboard/stats`);
-        const data = await response.json();
-        setStatsData(data);
+        const response = await dashboardApi.getStats();
+        setStatsData(response.data);
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
       }
@@ -208,7 +208,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-[#1A2118]/5">
                   {statsData.recentOrders.length > 0 ? (
-                    statsData.recentOrders.map((order: { _id: string; createdAt: string; status: string; total: number }) => (
+                    statsData.recentOrders.map((order: Order) => (
                       <tr key={order._id} className="group hover:bg-white/50 transition-colors">
                         <td className="py-4 text-sm font-bold text-[#1A2118]">
                           #{order._id.slice(-6)}
