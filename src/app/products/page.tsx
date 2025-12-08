@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import {
   fetchProducts,
@@ -17,6 +18,7 @@ import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 export default function ProductsPage() {
   const { products, loading } = useAppSelector((state) => state.products);
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -38,6 +40,12 @@ export default function ProductsPage() {
   useEffect(() => {
     dispatch(fetchProducts({}));
   }, [dispatch]);
+
+  useEffect(() => {
+    if (searchParams.get("action") === "add") {
+      handleAddProduct();
+    }
+  }, [searchParams]);
 
   const filteredProducts = products.filter(
     (product) =>

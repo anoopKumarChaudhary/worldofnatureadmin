@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "./components/AdminLayout";
 import {
   Users,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [statsData, setStatsData] = useState({
     totalOrders: 0,
     totalProducts: 0,
@@ -21,6 +23,41 @@ export default function Dashboard() {
     totalRevenue: 0,
     recentOrders: [],
   });
+
+  const handleDownloadReport = () => {
+    if (!statsData.recentOrders || statsData.recentOrders.length === 0) {
+      alert("No data to download");
+      return;
+    }
+
+    const headers = ["Order ID", "Date", "Status", "Total"];
+    const rows = statsData.recentOrders.map((order: any) => [
+      order._id,
+      new Date(order.createdAt).toLocaleDateString(),
+      order.status,
+      order.total,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "recent_orders_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleAddProduct = () => {
+    router.push("/products?action=add");
+  };
+
+  const handleViewOrders = () => {
+    router.push("/orders");
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -84,10 +121,16 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex gap-3">
-             <button className="px-4 py-2 bg-white/60 backdrop-blur-sm border border-white/50 rounded-lg text-sm font-bold text-[#1A2118] hover:bg-white transition-all shadow-sm">
+             <button 
+               onClick={handleDownloadReport}
+               className="px-4 py-2 bg-white/60 backdrop-blur-sm border border-white/50 rounded-lg text-sm font-bold text-[#1A2118] hover:bg-white transition-all shadow-sm"
+             >
                Download Report
              </button>
-             <button className="px-4 py-2 bg-[#1A2118] text-white rounded-lg text-sm font-bold hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20">
+             <button 
+               onClick={handleAddProduct}
+               className="px-4 py-2 bg-[#1A2118] text-white rounded-lg text-sm font-bold hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20"
+             >
                Add Product
              </button>
           </div>
@@ -144,7 +187,10 @@ export default function Dashboard() {
               <h3 className="text-xl font-serif font-bold text-[#1A2118]">
                 Recent Orders
               </h3>
-              <button className="text-sm font-bold text-[#BC5633] hover:text-[#1A2118] flex items-center gap-1 transition-colors">
+              <button 
+                onClick={handleViewOrders}
+                className="text-sm font-bold text-[#BC5633] hover:text-[#1A2118] flex items-center gap-1 transition-colors"
+              >
                 View All <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -215,10 +261,16 @@ export default function Dashboard() {
                    <p className="text-[#F2F0EA]/60 text-sm mb-6">Manage your store efficiently.</p>
                    
                    <div className="space-y-3">
-                      <button className="w-full py-3 bg-[#BC5633] hover:bg-[#A04628] rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#BC5633]/20">
+                      <button 
+                         onClick={handleAddProduct}
+                         className="w-full py-3 bg-[#BC5633] hover:bg-[#A04628] rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#BC5633]/20"
+                      >
                          Add New Product
                       </button>
-                      <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-colors">
+                      <button 
+                         onClick={handleViewOrders}
+                         className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-colors"
+                      >
                          View All Orders
                       </button>
                    </div>
