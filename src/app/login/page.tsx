@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Eye, EyeOff, Lock, User, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
@@ -18,16 +19,23 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email === "admin@worldofnature.com" && password === "admin123") {
-        localStorage.setItem("isAuthenticated", "true");
-        router.push("/");
-      } else {
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
         setError("Invalid email or password");
+      } else {
+        router.push("/");
       }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -140,7 +148,7 @@ export default function LoginPage() {
 
             <div className="text-center mt-6">
               <p className="text-xs text-[#F2F0EA]/40">
-                Demo: admin@worldofnature.com / admin123
+                Authorized Access Only
               </p>
             </div>
           </form>

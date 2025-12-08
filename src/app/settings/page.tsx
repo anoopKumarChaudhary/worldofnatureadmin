@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import AdminLayout from "../components/AdminLayout";
 import { Save, User, Bell, Shield, Palette } from "lucide-react";
 
 export default function SettingsPage() {
+  const { data: session, update } = useSession();
   const [settings, setSettings] = useState({
     storeName: "World of Nature",
-    email: "admin@worldofnature.com",
+    email: "",
     notifications: {
       email: true,
       push: false,
@@ -17,9 +19,124 @@ export default function SettingsPage() {
     language: "en",
   });
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    alert("Settings saved!");
+  useEffect(() => {
+    if (session?.user?.email) {
+      const userEmail = session.user.email;
+      setSettings(prev => ({ ...prev, email: userEmail }));
+    }
+  }, [session]);
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess(false);
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      // Get the token from NextAuth session (you might need to use useSession hook)
+      const res = await fetch("/api/auth/session");
+      const session = await res.json();
+      
+      if (!session?.user?.accessToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.user.accessToken}`,
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to change password");
+      }
+
+      setPasswordSuccess(true);
+      setTimeout(() => {
+        setIsPasswordModalOpen(false);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        setPasswordSuccess(false);
+      }, 2000);
+    } catch (err: any) {
+      setPasswordError(err.message || "An error occurred");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState({ type: "", text: "" });
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveMessage({ type: "", text: "" });
+
+    try {
+      const res = await fetch("/api/auth/session");
+      const session = await res.json();
+      
+      if (!session?.user?.accessToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/update-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.user.accessToken}`,
+        },
+        body: JSON.stringify({
+          email: settings.email,
+          // Add other fields here if needed
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update profile");
+      }
+
+      await update({ email: settings.email });
+      setSaveMessage({ type: "success", text: "Settings saved successfully!" });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveMessage({ type: "", text: "" }), 3000);
+
+    } catch (err: any) {
+      setSaveMessage({ type: "error", text: err.message || "An error occurred" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -30,13 +147,27 @@ export default function SettingsPage() {
             <h1 className="text-3xl font-serif font-medium text-[#1A2118]">Settings</h1>
             <p className="text-[#596157] mt-1">Manage your store preferences</p>
           </div>
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 rounded-xl bg-[#1A2118] px-5 py-2.5 text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 font-bold text-sm"
-          >
-            <Save className="h-4 w-4" />
-            Save Changes
-          </button>
+          <div className="flex items-center gap-4">
+            {saveMessage.text && (
+              <div className={`text-sm font-bold px-4 py-2 rounded-lg ${
+                saveMessage.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+              }`}>
+                {saveMessage.text}
+              </div>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 rounded-xl bg-[#1A2118] px-5 py-2.5 text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 font-bold text-sm disabled:opacity-50"
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -204,7 +335,10 @@ export default function SettingsPage() {
               <h3 className="text-lg font-serif font-bold text-[#1A2118]">Security</h3>
             </div>
             <div className="space-y-4">
-              <button className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#1A2118] hover:bg-[#BC5633] transition-colors">
+              <button 
+                onClick={() => setIsPasswordModalOpen(true)}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#1A2118] hover:bg-[#BC5633] transition-colors"
+              >
                 Change Password
               </button>
               <button className="w-full flex justify-center py-3 px-4 border border-[#1A2118]/10 rounded-xl shadow-sm text-sm font-bold text-[#1A2118] bg-white hover:bg-[#F2F0EA] transition-colors">
@@ -214,6 +348,87 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-[#1A2118] mb-6">Change Password</h3>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-gray-50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-gray-50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-gray-50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                />
+              </div>
+
+              {passwordError && (
+                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
+                  {passwordError}
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg">
+                  Password changed successfully!
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPasswordModalOpen(false);
+                    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                    setPasswordError("");
+                    setPasswordSuccess(false);
+                  }}
+                  className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isChangingPassword}
+                  className="flex-1 py-2.5 bg-[#BC5633] text-white rounded-xl text-sm font-bold hover:bg-[#A04628] transition-colors disabled:opacity-50"
+                >
+                  {isChangingPassword ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
