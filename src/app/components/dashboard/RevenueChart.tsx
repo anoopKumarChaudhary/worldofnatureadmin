@@ -22,16 +22,17 @@ const data = [
 
 export default function RevenueChart() {
   return (
-    <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-[2rem] p-6 shadow-sm h-[400px]">
+    <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-[2rem] p-6 shadow-sm h-[400px] flex flex-col">
       <h3 className="text-lg font-bold text-[#1A2118] mb-6">Revenue Overview</h3>
-      <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 min-h-0 w-full">
+        <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{
-            top: 10,
-            right: 30,
-            left: 0,
-            bottom: 0,
+            top: 20,
+            right: 20,
+            left: 20,
+            bottom: 10,
           }}
         >
           <defs>
@@ -75,6 +76,7 @@ export default function RevenueChart() {
           />
         </AreaChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }

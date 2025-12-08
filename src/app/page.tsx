@@ -156,14 +156,12 @@ export default function Dashboard() {
               className="group relative overflow-hidden rounded-[1.5rem] bg-white/60 backdrop-blur-md border border-white/50 p-6 shadow-sm hover:shadow-lg transition-all duration-300"
               style={{ animationDelay: `${idx * 100}ms` }}
             >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                 <stat.icon className="w-24 h-24 text-[#1A2118]" />
-              </div>
+
               
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${stat.color}/10 text-[#1A2118]`}>
-                    <stat.icon className="h-6 w-6" />
+                <div className="flex items-center justify-between mb-6">
+                  <div className={`p-3.5 rounded-full ${stat.color}/10 text-[#1A2118] group-hover:scale-110 transition-transform duration-300`}>
+                    <stat.icon className="h-6 w-6" strokeWidth={1.5} />
                   </div>
                   <div
                     className={`flex items-center text-xs font-bold px-2 py-1 rounded-full ${
@@ -181,12 +179,14 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <h3 className="text-sm font-medium text-[#596157] uppercase tracking-wider">
-                  {stat.name}
-                </h3>
-                <p className="text-3xl font-serif font-bold text-[#1A2118] mt-1">
-                  {stat.value}
-                </p>
+                <div>
+                  <p className="text-[11px] font-bold text-[#1A2118]/50 uppercase tracking-[0.15em] mb-2">
+                    {stat.name}
+                  </p>
+                  <h3 className="text-3xl font-serif font-medium text-[#1A2118] tracking-tight">
+                    {stat.value}
+                  </h3>
+                </div>
               </div>
             </div>
           ))}
