@@ -93,31 +93,52 @@ export default function SettingsPage() {
     }
   };
 
+  const [isConfirmPasswordModalOpen, setIsConfirmPasswordModalOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState({ type: "", text: "" });
 
   const handleSave = async () => {
+    // Check if email has changed
+    if (session?.user?.email && settings.email !== session.user.email) {
+      setIsConfirmPasswordModalOpen(true);
+      return;
+    }
+    
+    await executeSave();
+  };
+
+  const executeSave = async (password?: string) => {
     setIsSaving(true);
     setSaveMessage({ type: "", text: "" });
+    setConfirmPasswordError("");
 
     try {
       const res = await fetch("/api/auth/session");
-      const session = await res.json();
+      const sessionData = await res.json();
       
-      if (!session?.user?.accessToken) {
+      if (!sessionData?.user?.accessToken) {
         throw new Error("Not authenticated");
+      }
+
+      const body: any = {
+        email: settings.email,
+        // Add other fields here if needed
+      };
+
+      if (password) {
+        body.password = password;
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/update-profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.user.accessToken}`,
+          "Authorization": `Bearer ${sessionData.user.accessToken}`,
         },
-        body: JSON.stringify({
-          email: settings.email,
-          // Add other fields here if needed
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -128,12 +149,18 @@ export default function SettingsPage() {
 
       await update({ email: settings.email });
       setSaveMessage({ type: "success", text: "Settings saved successfully!" });
+      setIsConfirmPasswordModalOpen(false);
+      setConfirmPassword("");
       
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage({ type: "", text: "" }), 3000);
 
     } catch (err: any) {
-      setSaveMessage({ type: "error", text: err.message || "An error occurred" });
+      if (password) {
+         setConfirmPasswordError(err.message || "An error occurred");
+      } else {
+         setSaveMessage({ type: "error", text: err.message || "An error occurred" });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -423,6 +450,58 @@ export default function SettingsPage() {
                   className="flex-1 py-2.5 bg-[#BC5633] text-white rounded-xl text-sm font-bold hover:bg-[#A04628] transition-colors disabled:opacity-50"
                 >
                   {isChangingPassword ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Confirm Password Modal for Email Change */}
+      {isConfirmPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-[#1A2118] mb-4">Confirm Password</h3>
+            <p className="text-[#596157] mb-6 text-sm">
+              You are changing your email address. For security reasons, please enter your current password to confirm this change.
+            </p>
+            <form onSubmit={(e) => { e.preventDefault(); executeSave(confirmPassword); }} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="block w-full rounded-xl border-[#1A2118]/10 bg-gray-50 focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                />
+              </div>
+
+              {confirmPasswordError && (
+                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
+                  {confirmPasswordError}
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsConfirmPasswordModalOpen(false);
+                    setConfirmPassword("");
+                    setConfirmPasswordError("");
+                  }}
+                  className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2.5 bg-[#BC5633] text-white rounded-xl text-sm font-bold hover:bg-[#A04628] transition-colors disabled:opacity-50"
+                >
+                  {isSaving ? "Verifying..." : "Confirm & Save"}
                 </button>
               </div>
             </form>
