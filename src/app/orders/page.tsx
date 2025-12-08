@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
-import { fetchOrders } from "../redux/features/orders/ordersSlice";
+import { fetchOrders, updateOrderStatus } from "../redux/features/orders/ordersSlice";
 import AdminLayout from "../components/AdminLayout";
+import Modal from "../components/Modal";
 import { Search, Eye, Edit, ShoppingBag, Loader2 } from "lucide-react";
 
 export default function OrdersPage() {
   const { orders, loading } = useAppSelector((state) => state.orders);
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -22,6 +26,25 @@ export default function OrdersPage() {
       (order.shippingInfo && 
         (`${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`).toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleViewOrder = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateStatus = async (status: string) => {
+    if (!selectedOrder) return;
+    setUpdating(true);
+    try {
+      await dispatch(updateOrderStatus({ id: selectedOrder._id, status })).unwrap();
+      setSelectedOrder({ ...selectedOrder, status });
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert("Failed to update status");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -120,10 +143,16 @@ export default function OrdersPage() {
                         </td>
                         <td className="px-6 py-4 text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 text-[#1A2118]/60 hover:text-[#BC5633] hover:bg-[#BC5633]/10 rounded-full transition-colors">
+                            <button 
+                              onClick={() => handleViewOrder(order)}
+                              className="p-2 text-[#1A2118]/60 hover:text-[#BC5633] hover:bg-[#BC5633]/10 rounded-full transition-colors"
+                            >
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button className="p-2 text-[#1A2118]/60 hover:text-[#1A2118] hover:bg-[#1A2118]/5 rounded-full transition-colors">
+                            <button 
+                              onClick={() => handleViewOrder(order)}
+                              className="p-2 text-[#1A2118]/60 hover:text-[#1A2118] hover:bg-[#1A2118]/5 rounded-full transition-colors"
+                            >
                               <Edit className="h-4 w-4" />
                             </button>
                           </div>
@@ -140,6 +169,7 @@ export default function OrdersPage() {
                   <div
                     key={order._id}
                     className="rounded-xl bg-white/50 border border-[#1A2118]/5 p-4 shadow-sm"
+                    onClick={() => handleViewOrder(order)}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-bold text-[#1A2118]">
@@ -190,6 +220,118 @@ export default function OrdersPage() {
             <p className="text-[#596157] font-medium">No orders found.</p>
           </div>
         )}
+
+        {/* Order Details Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Order Details"
+        >
+          {selectedOrder && (
+            <div className="space-y-8">
+              {/* Header Info */}
+              <div className="flex flex-col md:flex-row justify-between gap-4 pb-6 border-b border-[#1A2118]/10">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Order ID</p>
+                  <p className="text-lg font-bold text-[#1A2118]">#{selectedOrder._id}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Date</p>
+                  <p className="text-[#1A2118]" suppressHydrationWarning>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Status</p>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedOrder.status}
+                      onChange={(e) => handleUpdateStatus(e.target.value)}
+                      disabled={updating}
+                      className="rounded-lg border-[#1A2118]/10 text-sm font-bold text-[#1A2118] focus:border-[#BC5633] focus:ring-[#BC5633]"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    {updating && <Loader2 className="w-4 h-4 animate-spin text-[#BC5633]" />}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Customer Details */}
+                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 mb-4">Customer Details</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#596157]">Name</span>
+                      <span className="font-medium text-[#1A2118]">
+                        {selectedOrder.shippingInfo ? `${selectedOrder.shippingInfo.firstName} ${selectedOrder.shippingInfo.lastName}` : selectedOrder.userName || "Guest"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#596157]">Email</span>
+                      <span className="font-medium text-[#1A2118]">{selectedOrder.shippingInfo?.email || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#596157]">Phone</span>
+                      <span className="font-medium text-[#1A2118]">{selectedOrder.shippingInfo?.phone || "N/A"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 mb-4">Shipping Address</h3>
+                  {selectedOrder.shippingInfo ? (
+                    <p className="text-sm text-[#1A2118] leading-relaxed">
+                      {selectedOrder.shippingInfo.address}<br />
+                      {selectedOrder.shippingInfo.city}, {selectedOrder.shippingInfo.state}<br />
+                      {selectedOrder.shippingInfo.zipCode}<br />
+                      {selectedOrder.shippingInfo.country}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-[#596157] italic">No shipping info available</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 mb-4">Order Items</h3>
+                <div className="bg-white rounded-2xl border border-[#1A2118]/5 shadow-sm overflow-hidden">
+                  <table className="min-w-full divide-y divide-[#1A2118]/5">
+                    <thead className="bg-[#F2F0EA]">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-[#1A2118]/60 uppercase tracking-wider">Product</th>
+                        <th className="px-6 py-3 text-right text-xs font-bold text-[#1A2118]/60 uppercase tracking-wider">Price</th>
+                        <th className="px-6 py-3 text-right text-xs font-bold text-[#1A2118]/60 uppercase tracking-wider">Qty</th>
+                        <th className="px-6 py-3 text-right text-xs font-bold text-[#1A2118]/60 uppercase tracking-wider">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1A2118]/5">
+                      {selectedOrder.items.map((item: any, index: number) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 text-sm font-medium text-[#1A2118]">{item.productTitle || "Product"}</td>
+                          <td className="px-6 py-4 text-sm text-[#596157] text-right">₹{item.price}</td>
+                          <td className="px-6 py-4 text-sm text-[#596157] text-right">{item.quantity}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-[#1A2118] text-right">₹{item.price * item.quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-[#F2F0EA]">
+                      <tr>
+                        <td colSpan={3} className="px-6 py-4 text-sm font-bold text-[#1A2118] text-right">Total Amount</td>
+                        <td className="px-6 py-4 text-sm font-bold text-[#1A2118] text-right">₹{selectedOrder.total}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal>
       </div>
     </AdminLayout>
   );
