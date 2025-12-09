@@ -13,9 +13,9 @@ const COLORS = ["#5A7D6B", "#B56B56", "#C4A052", "#E0C075"];
 
 export default function OrdersChart() {
   return (
-    <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-[2rem] p-6 shadow-sm h-[400px] flex flex-col">
+    <div className="bg-white/60 backdrop-blur-md border border-white/50 rounded-[2rem] p-6 shadow-sm h-[400px] flex flex-col min-h-[400px]">
       <h3 className="text-lg font-bold text-[#1A2118] mb-6">Order Status</h3>
-      <div className="flex-1 min-h-0 w-full">
+      <div className="flex-1 w-full h-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
