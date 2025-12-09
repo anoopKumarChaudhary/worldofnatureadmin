@@ -1,13 +1,15 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 export default function Modal({
@@ -15,7 +17,15 @@ export default function Modal({
   onClose,
   title,
   children,
+  footer,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -27,45 +37,47 @@ export default function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Overlay */}
-        <div
-          className="fixed inset-0 transition-opacity bg-[#14281D]/60 backdrop-blur-sm"
-          aria-hidden="true"
-          onClick={onClose}
-        ></div>
-
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
+  return createPortal(
+    <div 
+      // Offset by sidebar width (w-72 = 18rem) on large screens where sidebar is visible
+      className="fixed inset-0 lg:left-72 z-[9999] overflow-y-auto bg-[#14281D]/60 backdrop-blur-md transition-opacity"
+      onClick={onClose}
+    >
+      <div className="flex min-h-screen items-center justify-center py-24 px-4 text-center">
+        <div 
+          className="relative w-full max-w-2xl sm:max-w-5xl transform overflow-hidden rounded-2xl bg-[#F2F0EA] text-left shadow-2xl transition-all border border-white/50 flex flex-col"
+          onClick={(e) => e.stopPropagation()}
         >
-          &#8203;
-        </span>
-
-        {/* Modal Content */}
-        <div className="inline-block align-bottom bg-[#F2F0EA] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-16 sm:align-middle sm:max-w-6xl sm:w-full relative z-10 border border-white/50">
-          <div className="px-8 py-6 border-b border-[#1A2118]/10 flex items-center justify-between bg-white/50 backdrop-blur-md">
-            <h3 className="text-xl font-serif font-bold text-[#1A2118]">{title}</h3>
+          {/* Header */}
+          <div className="px-5 py-3 border-b border-[#1A2118]/10 flex items-center justify-between bg-white/50 backdrop-blur-md shrink-0">
+            <h3 className="text-base font-serif font-bold text-[#1A2118]">{title}</h3>
             <button
               onClick={onClose}
               className="text-[#1A2118]/40 hover:text-[#BC5633] transition-colors p-1 rounded-full hover:bg-[#1A2118]/5"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
           
+          {/* Content */}
           <div 
-            className="px-8 py-8 max-h-[85vh] overflow-y-auto custom-scrollbar"
+            className="px-5 py-5"
             data-lenis-prevent
           >
             {children}
           </div>
+
+          {/* Footer */}
+          {footer && (
+            <div className="px-5 py-3 border-t border-[#1A2118]/10 bg-white/50 backdrop-blur-md shrink-0 flex justify-end gap-2">
+              {footer}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

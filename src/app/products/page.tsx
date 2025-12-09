@@ -342,18 +342,35 @@ function ProductsContent() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           title={editingProduct ? "Edit Product" : "Add Product"}
+          footer={
+            <>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-3 rounded-xl text-sm font-bold text-[#1A2118] hover:bg-[#1A2118]/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProduct}
+                disabled={uploading}
+                className="px-8 py-3 bg-[#1A2118] rounded-xl text-sm font-bold text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {editingProduct ? "Update Product" : "Create Product"}
+              </button>
+            </>
+          }
         >
           <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Left Column: Image & Key Info */}
               <div className="space-y-6">
                 {/* Image Upload Card */}
-                <div className="bg-white p-4 rounded-2xl border border-[#1A2118]/5 shadow-sm">
+                <div className="bg-white p-3 rounded-xl border border-[#1A2118]/5 shadow-sm">
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-3">
                     Product Image
                   </label>
                   <div 
-                    className={`relative aspect-square rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
+                    className={`relative aspect-video rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
                       !formData.imageUrl ? "bg-[#F2F0EA]" : "bg-white"
                     }`}
                   >
@@ -363,7 +380,7 @@ function ProductsContent() {
                         <img 
                           src={formData.imageUrl} 
                           alt="Preview" 
-                          className="w-full h-full object-cover" 
+                          className="w-full h-full object-contain" 
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                            <p className="text-white text-xs font-bold uppercase tracking-widest">Change Image</p>
@@ -393,14 +410,14 @@ function ProductsContent() {
                 </div>
 
                 {/* Pricing & Inventory Card */}
-                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                <div className="bg-white p-4 rounded-xl border border-[#1A2118]/5 shadow-sm space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#1A2118]/40 border-b border-[#1A2118]/5 pb-3">
                     Pricing & Inventory
                   </h3>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Selling Price (₹)
                       </label>
                       <input
@@ -410,12 +427,13 @@ function ProductsContent() {
                         onChange={(e) =>
                           setFormData({ ...formData, price: e.target.value })
                         }
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors font-bold text-[#1A2118]"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all font-bold text-[#1A2118] py-1.5 px-3 text-lg placeholder:text-[#1A2118]/20"
+                        placeholder="0.00"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Original Price (MRP)
                       </label>
                       <input
@@ -426,16 +444,16 @@ function ProductsContent() {
                           setFormData({ ...formData, originalPrice: e.target.value })
                         }
                         placeholder="Optional"
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
                       />
                     </div>
                   </div>
                   
                   {/* Discount Badge */}
                   {formData.price && formData.originalPrice && parseFloat(formData.originalPrice) > parseFloat(formData.price) && (
-                     <div className="pt-3 border-t border-[#1A2118]/5 flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#1A2118]/60">Discount</span>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold">
+                     <div className="pt-4 border-t border-[#1A2118]/5 flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#1A2118]/40">Discount Applied</span>
+                        <span className="px-3 py-1 bg-[#BC5633]/10 text-[#BC5633] rounded-lg text-xs font-bold border border-[#BC5633]/20">
                            {Math.round(((parseFloat(formData.originalPrice) - parseFloat(formData.price)) / parseFloat(formData.originalPrice)) * 100)}% OFF
                         </span>
                      </div>
@@ -443,16 +461,16 @@ function ProductsContent() {
 
                   {/* Stock Toggle */}
                   <div className="pt-2">
-                    <div className="flex items-center p-3 bg-[#F2F0EA]/50 rounded-xl border border-[#1A2118]/5 cursor-pointer hover:border-[#BC5633]/30 transition-colors" onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}>
+                    <div className="flex items-center p-4 bg-[#F2F0EA]/30 rounded-xl border border-[#1A2118]/5 cursor-pointer hover:border-[#BC5633]/30 transition-all group" onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}>
                       <input
                         type="checkbox"
                         checked={formData.inStock}
                         onChange={(e) =>
                           setFormData({ ...formData, inStock: e.target.checked })
                         }
-                        className="h-4 w-4 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded cursor-pointer"
+                        className="h-5 w-5 text-[#BC5633] focus:ring-[#BC5633] border-gray-300 rounded cursor-pointer transition-all group-hover:scale-110"
                       />
-                      <label className="ml-3 block text-xs font-bold uppercase tracking-wider text-[#1A2118] cursor-pointer select-none">
+                      <label className="ml-3 block text-xs font-bold uppercase tracking-widest text-[#1A2118] cursor-pointer select-none">
                         In Stock
                       </label>
                     </div>
@@ -463,14 +481,14 @@ function ProductsContent() {
               {/* Right Column: Product Details */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Basic Info Card */}
-                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                <div className="bg-white p-4 rounded-xl border border-[#1A2118]/5 shadow-sm space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#1A2118]/40 border-b border-[#1A2118]/5 pb-3">
                     Basic Information
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Product Title
                       </label>
                       <input
@@ -479,14 +497,14 @@ function ProductsContent() {
                         onChange={(e) =>
                           setFormData({ ...formData, title: e.target.value })
                         }
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors text-lg font-bold text-[#1A2118] placeholder:font-normal"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all text-xl font-bold text-[#1A2118] placeholder:font-normal placeholder:text-[#1A2118]/20 py-1.5 px-3"
                         placeholder="e.g. A2 Cow Ghee"
                         required
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Category
                       </label>
                       <input
@@ -495,13 +513,14 @@ function ProductsContent() {
                         onChange={(e) =>
                           setFormData({ ...formData, category: e.target.value })
                         }
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
+                        placeholder="Select or type category"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Sizes <span className="text-[#1A2118]/30 normal-case font-normal">(comma separated)</span>
                       </label>
                       <input
@@ -510,13 +529,13 @@ function ProductsContent() {
                         onChange={(e) =>
                           setFormData({ ...formData, sizes: e.target.value })
                         }
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
                         placeholder="250g, 500g, 1kg"
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Description
                       </label>
                       <textarea
@@ -525,21 +544,22 @@ function ProductsContent() {
                           setFormData({ ...formData, description: e.target.value })
                         }
                         rows={3}
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors resize-none"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all resize-none py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20 leading-relaxed"
+                        placeholder="Describe your product..."
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Detailed Info Card */}
-                <div className="bg-white p-6 rounded-2xl border border-[#1A2118]/5 shadow-sm space-y-5">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1A2118]/60 border-b border-[#1A2118]/5 pb-2">
+                <div className="bg-white p-4 rounded-xl border border-[#1A2118]/5 shadow-sm space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#1A2118]/40 border-b border-[#1A2118]/5 pb-3">
                     Product Details
                   </h3>
 
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                         Ingredients
                       </label>
                       <textarea
@@ -548,13 +568,14 @@ function ProductsContent() {
                           setFormData({ ...formData, ingredients: e.target.value })
                         }
                         rows={2}
-                        className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                        className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
+                        placeholder="List ingredients..."
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                           Sourcing
                         </label>
                         <textarea
@@ -563,12 +584,13 @@ function ProductsContent() {
                             setFormData({ ...formData, sourcing: e.target.value })
                           }
                           rows={3}
-                          className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                          className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
+                          placeholder="Where is it from?"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1.5">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[#1A2118]/50 mb-2">
                           Taste Profile
                         </label>
                         <textarea
@@ -577,29 +599,14 @@ function ProductsContent() {
                             setFormData({ ...formData, tasteProfile: e.target.value })
                           }
                           rows={3}
-                          className="block w-full rounded-xl border-[#1A2118]/10 bg-[#F2F0EA]/50 shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] transition-colors"
+                          className="block w-full rounded-xl border-[#1A2118]/10 bg-white shadow-sm focus:border-[#BC5633] focus:ring-[#BC5633] hover:border-[#BC5633]/30 transition-all py-1.5 px-3 text-[#1A2118] placeholder:text-[#1A2118]/20"
+                          placeholder="How does it taste?"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 pt-4 border-t border-[#1A2118]/10">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-6 py-3 rounded-xl text-sm font-bold text-[#1A2118] hover:bg-[#1A2118]/5 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveProduct}
-                disabled={uploading}
-                className="px-8 py-3 bg-[#1A2118] rounded-xl text-sm font-bold text-white hover:bg-[#BC5633] transition-all shadow-lg shadow-[#1A2118]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {editingProduct ? "Update Product" : "Create Product"}
-              </button>
             </div>
           </div>
         </Modal>
