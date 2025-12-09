@@ -9,17 +9,19 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
 } from "lucide-react";
 import { dashboardApi } from "./api/dashboard";
 import { Order } from "./types";
 import RevenueChart from "./components/dashboard/RevenueChart";
 import OrdersChart from "./components/dashboard/OrdersChart";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
+import { fetchProducts } from "./redux/features/products/productsSlice";
 
 export default function Dashboard() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { products } = useAppSelector((state) => state.products);
   const [statsData, setStatsData] = useState({
     totalOrders: 0,
     totalProducts: 0,
@@ -73,42 +75,38 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, []);
+    dispatch(fetchProducts({}));
+  }, [dispatch]);
 
   const stats = [
     {
       name: "Total Products",
       value: statsData.totalProducts,
       icon: Package,
-      change: "+12%",
-      changeType: "positive",
       color: "bg-blue-500",
     },
     {
       name: "Total Orders",
       value: statsData.totalOrders,
       icon: ShoppingCart,
-      change: "+8%",
-      changeType: "positive",
       color: "bg-[#BC5633]",
     },
     {
       name: "Total Users",
       value: statsData.totalUsers,
       icon: Users,
-      change: "+23%",
-      changeType: "positive",
       color: "bg-emerald-500",
     },
     {
       name: "Revenue",
       value: `₹${statsData.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
-      change: "-4%",
-      changeType: "negative",
       color: "bg-amber-500",
     },
   ];
+
+  // Get top 3 products (mock logic: just take first 3 for now as backend doesn't sort by sales yet)
+  const topProducts = products.slice(0, 3);
 
   return (
     <AdminLayout>
@@ -162,20 +160,6 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-6">
                   <div className={`p-3.5 rounded-full ${stat.color}/10 text-[#1A2118] group-hover:scale-110 transition-transform duration-300`}>
                     <stat.icon className="h-6 w-6" strokeWidth={1.5} />
-                  </div>
-                  <div
-                    className={`flex items-center text-xs font-bold px-2 py-1 rounded-full ${
-                      stat.changeType === "positive"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {stat.changeType === "positive" ? (
-                      <TrendingUp className="mr-1 h-3 w-3" />
-                    ) : (
-                      <TrendingDown className="mr-1 h-3 w-3" />
-                    )}
-                    {stat.change}
                   </div>
                 </div>
                 
@@ -292,16 +276,23 @@ export default function Dashboard() {
              <div className="rounded-[2rem] bg-white/60 backdrop-blur-md border border-white/50 p-6 shadow-sm">
                 <h3 className="text-lg font-serif font-bold text-[#1A2118] mb-4">Top Products</h3>
                 <div className="space-y-4">
-                   {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer">
-                         <div className="w-12 h-12 bg-[#F2F0EA] rounded-lg"></div>
-                         <div>
-                            <p className="text-sm font-bold text-[#1A2118]">Product Name {i}</p>
-                            <p className="text-xs text-[#596157]">24 sales this week</p>
-                         </div>
-                         <div className="ml-auto text-sm font-bold text-[#1A2118]">₹1,200</div>
-                      </div>
-                   ))}
+                   {topProducts.length > 0 ? (
+                     topProducts.map((product) => (
+                       <div key={product._id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer" onClick={() => router.push('/products')}>
+                          <div className="w-12 h-12 bg-[#F2F0EA] rounded-lg overflow-hidden shrink-0">
+                             {/* eslint-disable-next-line @next/next/no-img-element */}
+                             <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                             <p className="text-sm font-bold text-[#1A2118] truncate">{product.title}</p>
+                             <p className="text-xs text-[#596157] truncate">{product.category}</p>
+                          </div>
+                          <div className="ml-auto text-sm font-bold text-[#1A2118]">₹{product.price}</div>
+                       </div>
+                     ))
+                   ) : (
+                     <p className="text-sm text-[#596157] text-center py-4">No products found.</p>
+                   )}
                 </div>
              </div>
           </div>
