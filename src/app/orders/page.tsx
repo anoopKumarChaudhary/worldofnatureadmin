@@ -6,6 +6,7 @@ import { fetchOrders, updateOrderStatus } from "../redux/features/orders/ordersS
 import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
 import { Search, Eye, Edit, ShoppingBag, Loader2 } from "lucide-react";
+import { formatDate } from "../../utils/date";
 
 export default function OrdersPage() {
   const { orders, loading } = useAppSelector((state) => state.orders);
@@ -139,7 +140,7 @@ export default function OrdersPage() {
                           className="px-6 py-4 text-sm text-[#596157]"
                           suppressHydrationWarning
                         >
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {formatDate(order.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -198,7 +199,7 @@ export default function OrdersPage() {
                       </div>
                       <div className="flex justify-between">
                          <span>Date</span>
-                         <span suppressHydrationWarning>{new Date(order.createdAt).toLocaleDateString()}</span>
+                          <span suppressHydrationWarning>{formatDate(order.createdAt)}</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-[#1A2118]/5">
                          <span className="font-bold text-[#1A2118]">Total</span>
@@ -237,7 +238,7 @@ export default function OrdersPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Date</p>
-                  <p className="text-[#1A2118]" suppressHydrationWarning>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                  <p className="text-[#1A2118]" suppressHydrationWarning>{formatDate(selectedOrder.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Status</p>

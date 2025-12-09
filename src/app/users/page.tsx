@@ -6,6 +6,7 @@ import { fetchUsers, updateUser } from "../redux/features/users/usersSlice";
 import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
 import { Search, Eye, Edit, Users as UsersIcon, Loader2, Save, X } from "lucide-react";
+import { formatDate, getSmartDate } from "../../utils/date";
 
 export default function UsersPage() {
   const { users, loading } = useAppSelector((state) => state.users);
@@ -152,7 +153,7 @@ export default function UsersPage() {
                           className="px-6 py-4 text-sm text-[#596157]"
                           suppressHydrationWarning
                         >
-                          {new Date(user.createdAt).toLocaleDateString()}
+                          {formatDate(getSmartDate(user))}
                         </td>
                         <td className="px-6 py-4 text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -266,7 +267,7 @@ export default function UsersPage() {
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-1">Joined Date</p>
                 <p className="text-sm text-[#1A2118]" suppressHydrationWarning>
-                  {new Date(selectedUser.createdAt).toLocaleDateString()}
+                  {formatDate(getSmartDate(selectedUser))}
                 </p>
               </div>
               <div>

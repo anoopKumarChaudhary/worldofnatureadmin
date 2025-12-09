@@ -11,6 +11,7 @@ import {
   DollarSign,
   ArrowRight,
 } from "lucide-react";
+import { formatDate } from "../utils/date";
 import { dashboardApi } from "./api/dashboard";
 import { Order } from "./types";
 import RevenueChart from "./components/dashboard/RevenueChart";
@@ -39,7 +40,7 @@ export default function Dashboard() {
     const headers = ["Order ID", "Date", "Status", "Total"];
     const rows = statsData.recentOrders.map((order: Order) => [
       order._id,
-      new Date(order.createdAt).toLocaleDateString(),
+      formatDate(order.createdAt),
       order.status,
       order.total,
     ]);
@@ -210,7 +211,7 @@ export default function Dashboard() {
                           #{order._id.slice(-6)}
                         </td>
                         <td className="py-4 text-sm text-[#596157]">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {formatDate(order.createdAt)}
                         </td>
                          <td className="py-4 text-sm text-[#1A2118]">
                           {/* Placeholder for customer name if not available in stats */}
