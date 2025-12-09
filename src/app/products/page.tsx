@@ -13,11 +13,13 @@ import {
 import { uploadApi } from "../api/upload";
 import AdminLayout from "../components/AdminLayout";
 import Modal from "../components/Modal";
+import { useToast } from "../context/ToastContext";
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 
 function ProductsContent() {
   const { products, loading } = useAppSelector((state) => state.products);
   const dispatch = useAppDispatch();
+  const { addToast } = useToast();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,11 +97,12 @@ function ProductsContent() {
     setUploading(true);
     try {
       const file = e.target.files[0];
-      const response = await uploadApi.uploadFile(file);
-      setFormData({ ...formData, imageUrl: response.data.url });
+      const imageUrl = await uploadApi.uploadFile(file); // Changed to uploadFile as per original, but variable name to imageUrl
+      setFormData((prev) => ({ ...prev, imageUrl: imageUrl.data.url })); // Adjusted to match original formData key and response structure
+      addToast("Image uploaded successfully", "success");
     } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Image upload failed");
+      console.error("Failed to upload image:", error);
+      addToast("Failed to upload image", "error");
     } finally {
       setUploading(false);
     }
@@ -124,22 +127,35 @@ function ProductsContent() {
       sizes: sizesArray,
     };
 
-    if (editingProduct) {
-      await dispatch(
-        updateProduct({
-          id: editingProduct._id,
-          data: productData,
-        })
-      );
-    } else {
-      await dispatch(addProduct(productData));
+    try {
+      if (editingProduct) {
+        await dispatch(
+          updateProduct({
+            id: editingProduct._id,
+            data: productData,
+          })
+        ).unwrap();
+        addToast("Product updated successfully", "success");
+      } else {
+        await dispatch(addProduct(productData)).unwrap();
+        addToast("Product created successfully", "success");
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save product:", error);
+      addToast("Failed to save product. Please try again.", "error");
     }
-    setIsModalOpen(false);
   };
 
-  const handleDeleteProduct = (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      dispatch(deleteProduct(productId));
+      try {
+        await dispatch(deleteProduct(productId)).unwrap();
+        addToast("Product deleted successfully", "success");
+      } catch (error) {
+        console.error("Failed to delete product:", error);
+        addToast("Failed to delete product", "error");
+      }
     }
   };
 
