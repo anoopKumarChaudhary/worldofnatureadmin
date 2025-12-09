@@ -14,7 +14,12 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => {
+        return !!token && (token.role === "admin" || token.role === "super-admin");
+      },
+    },
+    pages: {
+      signIn: "/login",
     },
   }
 );
@@ -29,6 +34,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - login (login page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|forgot-password|reset-password).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|login|forgot-password|reset-password|image.png).*)",
   ],
 };
