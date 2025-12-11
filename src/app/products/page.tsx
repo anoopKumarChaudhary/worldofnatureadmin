@@ -33,6 +33,7 @@ function ProductsContent() {
     category: "",
     imageUrl: "",
     images: [] as string[],
+    videoUrl: "",
     ingredients: "",
     sourcing: "",
     tasteProfile: "",
@@ -66,6 +67,7 @@ function ProductsContent() {
       category: "",
       imageUrl: "",
       images: [],
+      videoUrl: "",
       ingredients: "",
       sourcing: "",
       tasteProfile: "",
@@ -85,6 +87,7 @@ function ProductsContent() {
       category: product.category,
       imageUrl: product.imageUrl,
       images: product.images || [],
+      videoUrl: product.videoUrl || "",
       ingredients: product.ingredients || "",
       sourcing: product.sourcing || "",
       tasteProfile: product.tasteProfile || "",
@@ -160,6 +163,23 @@ function ProductsContent() {
 
   const setMainImage = (url: string) => {
     setFormData(prev => ({ ...prev, imageUrl: url }));
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setUploading(true);
+    try {
+      const file = e.target.files[0];
+      const result = await uploadApi.uploadFile(file);
+      setFormData((prev) => ({ ...prev, videoUrl: result.data.url }));
+      addToast("Video uploaded successfully", "success");
+    } catch (error) {
+      console.error("Failed to upload video:", error);
+      addToast("Failed to upload video", "error");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSaveProduct = async () => {
@@ -592,7 +612,57 @@ function ProductsContent() {
                     </div>
                   </div>
                 </div>
-              </div>
+
+                  {/* Video Upload Card */}
+                  <div className="bg-white p-3 rounded-xl border border-[#1A2118]/5 shadow-sm">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-3">
+                      Product Video (Optional)
+                    </label>
+                    <div 
+                      className={`relative aspect-video rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
+                        !formData.videoUrl ? "bg-[#F2F0EA]" : "bg-white"
+                      }`}
+                    >
+                      {formData.videoUrl ? (
+                        <>
+                          <video 
+                            src={formData.videoUrl} 
+                            controls
+                            className="w-full h-full object-contain" 
+                          />
+                          <div className="absolute top-2 right-2">
+                             <button
+                                onClick={() => setFormData(prev => ({ ...prev, videoUrl: "" }))}
+                                className="p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600 shadow-sm"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-[#1A2118]/40">
+                          {uploading ? (
+                            <Loader2 className="w-8 h-8 animate-spin text-[#BC5633]" />
+                          ) : (
+                            <>
+                              <div className="w-10 h-10 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2 group-hover:bg-[#BC5633]/10 group-hover:text-[#BC5633] transition-colors">
+                                 <Plus className="w-5 h-5" />
+                              </div>
+                              <span className="text-[10px] font-bold uppercase tracking-widest">Upload Video</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={!!formData.videoUrl || uploading}
+                      />
+                    </div>
+                  </div>
+                </div>
 
               {/* Right Column: Product Details */}
               <div className="lg:col-span-2 space-y-6">
