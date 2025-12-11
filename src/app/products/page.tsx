@@ -32,6 +32,7 @@ function ProductsContent() {
     originalPrice: "",
     category: "",
     imageUrl: "",
+    images: [] as string[],
     ingredients: "",
     sourcing: "",
     tasteProfile: "",
@@ -64,6 +65,7 @@ function ProductsContent() {
       originalPrice: "",
       category: "",
       imageUrl: "",
+      images: [],
       ingredients: "",
       sourcing: "",
       tasteProfile: "",
@@ -82,6 +84,7 @@ function ProductsContent() {
       originalPrice: product.originalPrice ? product.originalPrice.toString() : "",
       category: product.category,
       imageUrl: product.imageUrl,
+      images: product.images || [],
       ingredients: product.ingredients || "",
       sourcing: product.sourcing || "",
       tasteProfile: product.tasteProfile || "",
@@ -97,8 +100,13 @@ function ProductsContent() {
     setUploading(true);
     try {
       const file = e.target.files[0];
-      const imageUrl = await uploadApi.uploadFile(file); // Changed to uploadFile as per original, but variable name to imageUrl
-      setFormData((prev) => ({ ...prev, imageUrl: imageUrl.data.url })); // Adjusted to match original formData key and response structure
+      const imageUrl = await uploadApi.uploadFile(file);
+      setFormData((prev) => ({ 
+        ...prev, 
+        imageUrl: imageUrl.data.url,
+        // If it's the first image and images array is empty, also add to images
+        images: prev.images.length === 0 ? [imageUrl.data.url] : prev.images
+      }));
       addToast("Image uploaded successfully", "success");
     } catch (error) {
       console.error("Failed to upload image:", error);
@@ -106,6 +114,52 @@ function ProductsContent() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleMultipleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setUploading(true);
+    try {
+      const files = Array.from(e.target.files);
+      const uploadPromises = files.map(file => uploadApi.uploadFile(file));
+      const responses = await Promise.all(uploadPromises);
+      const newImageUrls = responses.map(res => res.data.url);
+      
+      setFormData((prev) => {
+        const updatedImages = [...prev.images, ...newImageUrls];
+        return {
+          ...prev,
+          images: updatedImages,
+          // If imageUrl is empty, set it to the first uploaded image
+          imageUrl: !prev.imageUrl && updatedImages.length > 0 ? updatedImages[0] : prev.imageUrl
+        };
+      });
+      addToast(`${newImageUrls.length} images uploaded successfully`, "success");
+    } catch (error) {
+      console.error("Failed to upload images:", error);
+      addToast("Failed to upload images", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setFormData((prev) => {
+      const newImages = prev.images.filter((_, index) => index !== indexToRemove);
+      return {
+        ...prev,
+        images: newImages,
+        // If we removed the main image (imageUrl), update it to the first of remaining images or empty
+        imageUrl: prev.imageUrl === prev.images[indexToRemove] 
+          ? (newImages.length > 0 ? newImages[0] : "") 
+          : prev.imageUrl
+      };
+    });
+  };
+
+  const setMainImage = (url: string) => {
+    setFormData(prev => ({ ...prev, imageUrl: url }));
   };
 
   const handleSaveProduct = async () => {
@@ -381,47 +435,93 @@ function ProductsContent() {
               {/* Left Column: Image & Key Info */}
               <div className="space-y-6">
                 {/* Image Upload Card */}
-                <div className="bg-white p-3 rounded-xl border border-[#1A2118]/5 shadow-sm">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-3">
-                    Product Image
-                  </label>
-                  <div 
-                    className={`relative aspect-video rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group ${
-                      !formData.imageUrl ? "bg-[#F2F0EA]" : "bg-white"
-                    }`}
-                  >
-                    {formData.imageUrl ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={formData.imageUrl} 
-                          alt="Preview" 
-                          className="w-full h-full object-contain" 
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                           <p className="text-white text-xs font-bold uppercase tracking-widest">Change Image</p>
+                <div className="bg-white p-3 rounded-xl border border-[#1A2118]/5 shadow-sm space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#1A2118]/60 mb-3">
+                      Product Images
+                    </label>
+                    
+                    {/* Main Image Preview */}
+                    <div 
+                      className={`relative aspect-video rounded-xl border-2 border-dashed border-[#1A2118]/10 hover:border-[#BC5633]/50 transition-all overflow-hidden group mb-4 ${
+                        !formData.imageUrl ? "bg-[#F2F0EA]" : "bg-white"
+                      }`}
+                    >
+                      {formData.imageUrl ? (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img 
+                            src={formData.imageUrl} 
+                            alt="Main Preview" 
+                            className="w-full h-full object-contain" 
+                          />
+                          <div className="absolute top-2 left-2 bg-[#BC5633] text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider shadow-sm">
+                            Main Image
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-[#1A2118]/40">
+                          <div className="w-10 h-10 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2">
+                             <Package className="w-5 h-5" />
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">No Main Image</span>
                         </div>
-                      </>
-                    ) : (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[#1A2118]/40">
-                        {uploading ? (
-                          <Loader2 className="w-8 h-8 animate-spin text-[#BC5633]" />
-                        ) : (
-                          <>
-                            <div className="w-10 h-10 rounded-full bg-[#1A2118]/5 flex items-center justify-center mb-2 group-hover:bg-[#BC5633]/10 group-hover:text-[#BC5633] transition-colors">
-                               <Plus className="w-5 h-5" />
+                      )}
+                    </div>
+
+                    {/* Image Gallery Grid */}
+                    {formData.images.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        {formData.images.map((img, idx) => (
+                          <div key={idx} className={`relative aspect-square rounded-lg overflow-hidden border ${formData.imageUrl === img ? 'border-[#BC5633] ring-2 ring-[#BC5633]/20' : 'border-[#1A2118]/10'} group`}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            
+                            {/* Hover Actions */}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                              {formData.imageUrl !== img && (
+                                <button
+                                  onClick={() => setMainImage(img)}
+                                  className="px-2 py-1 bg-white/90 text-[#1A2118] text-[10px] font-bold rounded uppercase tracking-wider hover:bg-white"
+                                >
+                                  Set Main
+                                </button>
+                              )}
+                              <button
+                                onClick={() => removeImage(idx)}
+                                className="p-1.5 bg-red-500/90 text-white rounded-full hover:bg-red-600"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Upload</span>
-                          </>
-                        )}
+                          </div>
+                        ))}
                       </div>
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
+
+                    {/* Upload Button */}
+                    <div className="relative">
+                      <div className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-[#1A2118]/10 rounded-xl hover:border-[#BC5633]/50 hover:bg-[#BC5633]/5 transition-all cursor-pointer group">
+                        <div className="flex items-center gap-2 text-[#1A2118]/60 group-hover:text-[#BC5633]">
+                          {uploading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4" />
+                          )}
+                          <span className="text-xs font-bold uppercase tracking-widest">
+                            {uploading ? "Uploading..." : "Add Images"}
+                          </span>
+                        </div>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleMultipleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploading}
+                      />
+                    </div>
                   </div>
                 </div>
 
