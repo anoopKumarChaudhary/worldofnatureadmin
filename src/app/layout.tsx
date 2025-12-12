@@ -18,6 +18,9 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "World of Nature Admin",
   description: "Admin dashboard for World of Nature",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
